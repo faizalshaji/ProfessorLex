@@ -23,22 +23,8 @@ function App() {
   }, []);
 
   async function loadTrie(): Promise<any> {
-    const res = await fetch("/ProfessorLex/wordlist.txt");
-    const words = (await res.text())
-      .split("\n")
-      .map((w) => w.trim())
-      .filter((w) => w);
-    debugger;
+    const words = await loadWords();
     return Trie(words);
-  }
-
-  function traceSpecContains(
-    c: Cell,
-    w: string,
-    grid: Cell[][],
-    trace: Cell[]
-  ): boolean {
-    return false;
   }
 
   function initGrid() {
@@ -53,6 +39,15 @@ function App() {
       }
     }
     setGrid(cells);
+  }
+
+  async function loadWords() {
+    const res = await fetch("/ProfessorLex/wordlist.txt");
+    const words = (await res.text())
+      .split("\n")
+      .map((w) => w.trim())
+      .filter((w) => w);
+    return words;
   }
 
   function onMouseDown(cell: Cell) {
@@ -103,9 +98,6 @@ function App() {
             {row.map((c) => {
               const tracing = trace.some(
                 (t) => t.row === c.row && t.col === c.col
-              );
-              const used = foundWords.some((w) =>
-                traceSpecContains(c, w, grid, trace)
               );
               return (
                 <div

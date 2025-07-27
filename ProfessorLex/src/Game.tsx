@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Trie from "trie-prefix-tree";
-import "./Game.scss";
 
 type Cell = { letter: string; row: number; col: number };
 
@@ -86,15 +85,20 @@ function Game() {
   }
 
   return (
-    <div className="app" onMouseUp={onMouseUp}>
-      <h1>Professor Lex</h1>
-      <div className="info">
+    <div
+      className="min-h-screen bg-gray-100 p-6 text-center select-none"
+      onMouseUp={onMouseUp}
+    >
+      <h1 className="text-3xl font-bold mb-4">Professor Lex</h1>
+
+      <div className="flex justify-center gap-10 text-lg mb-4 font-medium text-gray-700">
         <p>Time: {time}s</p>
         <p>Score: {score}</p>
       </div>
-      <div className="grid">
+
+      <div className="inline-block border-2 border-white bg-white shadow-md p-1">
         {grid.map((row, ri) => (
-          <div key={ri} className="row">
+          <div key={ri} className="flex">
             {row.map((c) => {
               const tracing = trace.some(
                 (t) => t.row === c.row && t.col === c.col
@@ -102,7 +106,9 @@ function Game() {
               return (
                 <div
                   key={`${c.row}-${c.col}`}
-                  className={`cell ${tracing ? "tracing" : ""}`}
+                  className={`w-12 h-12 border text-lg font-semibold flex items-center justify-center cursor-pointer ${
+                    tracing ? "bg-yellow-300" : "bg-white"
+                  }`}
                   onMouseDown={() => onMouseDown(c)}
                   onMouseEnter={() => onMouseEnter(c)}
                 >
@@ -113,18 +119,22 @@ function Game() {
           </div>
         ))}
       </div>
-      <div className="found">
-        <h3>Found Words ({foundWords.length})</h3>
-        <ul>
+
+      <div className="mt-6">
+        <h3 className="text-xl font-semibold">
+          Found Words ({foundWords.length})
+        </h3>
+        <ul className="mt-2 list-disc list-inside text-gray-700">
           {foundWords.map((w) => (
             <li key={w}>{w}</li>
           ))}
         </ul>
       </div>
+
       {time === 0 && (
-        <div className="game-over">
+        <div className="mt-6 text-red-600 text-xl font-bold">
           <h2>Game Over!</h2>
-          <p>Your score: {score}</p>
+          <p className="mt-1">Your score: {score}</p>
         </div>
       )}
     </div>

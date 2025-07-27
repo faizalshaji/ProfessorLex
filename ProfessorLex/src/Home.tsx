@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Popup from "../Popup/Popup";
-import Configuration from "../Configuration/Configuration";
+import Popup from "./Popup";
+import Configuration from "./Configuration";
 
 function Home() {
   const navigate = useNavigate();
@@ -34,30 +34,35 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
-      <h1 className="text-4xl font-bold text-blue-600 mb-8">Professor Lex</h1>
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center px-4 text-white">
+      <h1 className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 drop-shadow-lg mb-12 text-center">
+        Professor Lex
+      </h1>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6 w-full max-w-sm">
         <button
           onClick={() => setShowPopup(true)}
-          className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="w-full py-3 bg-blue-500 hover:bg-blue-600 transition duration-200 rounded-lg text-lg font-semibold shadow-lg transform hover:scale-105"
         >
           Single Player
         </button>
         <button
           onClick={() => setShowPopup(true)}
-          className="px-6 py-3 bg-green-500 text-white rounded hover:bg-green-600"
+          className="w-full py-3 bg-green-500 hover:bg-green-600 transition duration-200 rounded-lg text-lg font-semibold shadow-lg transform hover:scale-105"
         >
-          Multi Player
+          Multiplayer
         </button>
       </div>
 
       <Popup
         isOpen={showPopup}
-        onClose={() => setShowPopup(false)}
+        onClose={() => {
+          setShowPopup(false);
+          setError("");
+        }}
         title="Game Settings"
       >
-        <div className="space-y-6">
+        <div className="space-y-6 text-gray-100">
           <Configuration
             gridSize={gridSize}
             setGridSize={setGridSize}
@@ -68,30 +73,30 @@ function Home() {
           <div className="flex gap-4">
             <button
               onClick={handleStart}
-              className="flex-1 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="flex-1 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg shadow transform hover:scale-105"
             >
               Start Game
             </button>
             <button
               onClick={createRoom}
-              className="flex-1 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              className="flex-1 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg shadow transform hover:scale-105"
             >
               Create Room
             </button>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <input
               type="text"
               placeholder="Enter Room Name"
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
-              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring focus:border-blue-500"
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
             />
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && <p className="text-red-400 text-sm">{error}</p>}
             <button
               onClick={handleJoinRoom}
-              className="w-full py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+              className="w-full py-2 bg-purple-500 hover:bg-purple-600 rounded-lg shadow transform hover:scale-105"
             >
               Join Room
             </button>

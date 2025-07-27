@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import Game from "../../Game";
+import Game from "../Game";
 
 function Multiplayer() {
   const { roomName } = useParams();

@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
-import Home from "./Home/Home";
-import SinglePlayer from "./GameMode/SinglePlayer/SinglePlayer";
-import Multiplayer from "./GameMode/MultiPlayer/MultiPlayer";
+import Home from "./Home";
+import SinglePlayer from "./GameMode/SinglePlayer";
+import Multiplayer from "./GameMode/MultiPlayer";
 
 function App() {
   return (

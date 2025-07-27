@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Trie from "trie-prefix-tree";
 import {
   ArrowUpIcon,
@@ -22,7 +22,6 @@ function Game() {
   const [score, setScore] = useState(0);
   const [time, setTime] = useState(120);
   const [trie, setTrie] = useState<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadTrie().then((t) => {
@@ -64,7 +63,7 @@ function Game() {
   function isAdjacent(a: Cell, b: Cell) {
     const dr = Math.abs(a.row - b.row);
     const dc = Math.abs(a.col - b.col);
-    return dr <= 1 && dc <= 1 && dr + dc > 0; // Must be neighbor, not same
+    return dr <= 1 && dc <= 1 && dr + dc > 0;
   }
 
   function onMouseEnter(cell: Cell) {
@@ -75,13 +74,11 @@ function Game() {
       (c) => c.row === cell.row && c.col === cell.col
     );
 
-    // Move backward in trace (untrace)
     if (idxInTrace !== -1 && idxInTrace < trace.length - 1) {
       setTrace(trace.slice(0, idxInTrace + 1));
       return;
     }
 
-    // Add new cell if adjacent and not already in trace
     const alreadyTraced = idxInTrace !== -1;
     if (!alreadyTraced && isAdjacent(last, cell)) {
       setTrace([...trace, cell]);
@@ -103,15 +100,6 @@ function Game() {
       setScore((s) => s + word.length);
     }
     setTrace([]);
-  }
-
-  function getCellCenter(cell: Cell) {
-    const cellSize = 48; // w-12 / h-12
-    const offset = containerRef.current?.getBoundingClientRect();
-    return {
-      x: cell.col * cellSize + cellSize / 2,
-      y: cell.row * cellSize + cellSize / 2,
-    };
   }
 
   function getDirection(from: Cell, to: Cell) {
@@ -154,92 +142,47 @@ function Game() {
         </p>
       </div>
 
-      {/* Grid with arrows */}
-      <div className="relative inline-block" ref={containerRef}>
-        {/* Arrows using SVG */}
-        <svg
-          className="absolute top-0 left-0 pointer-events-none"
-          width={GRID_SIZE * 48}
-          height={GRID_SIZE * 48}
-        >
-          {trace.length > 1 &&
-            trace.map((cell, i) => {
-              const next = trace[i + 1];
-              if (!next) return null;
-              const start = getCellCenter(cell);
-              const end = getCellCenter(next);
-              return (
-                <line
-                  key={i}
-                  x1={start.x}
-                  y1={start.y}
-                  x2={end.x}
-                  y2={end.y}
-                  stroke="yellow"
-                  strokeWidth="4"
-                  markerEnd="url(#arrowhead)"
-                />
-              );
-            })}
-          <defs>
-            <marker
-              id="arrowhead"
-              markerWidth="10"
-              markerHeight="7"
-              refX="0"
-              refY="3.5"
-              orient="auto"
-              markerUnits="strokeWidth"
+      {/* Grid */}
+      <div
+        className={`grid gap-1 bg-white border-4 border-gray-200 shadow-md mx-auto ${
+          {
+            4: "grid-cols-4 grid-rows-4",
+            5: "grid-cols-5 grid-rows-5",
+            6: "grid-cols-6 grid-rows-6",
+            7: "grid-cols-7 grid-rows-7",
+            8: "grid-cols-8 grid-rows-8",
+            9: "grid-cols-9 grid-rows-9",
+            10: "grid-cols-10 grid-rows-10",
+          }[GRID_SIZE]
+        }`}
+      >
+        {grid.flat().map((c) => {
+          const tracing = trace.some((t) => t.row === c.row && t.col === c.col);
+          const currentIdx = trace.findIndex(
+            (t) => t.row === c.row && t.col === c.col
+          );
+          const prevCell = currentIdx > 0 ? trace[currentIdx - 1] : null;
+
+          return (
+            <div
+              key={`${c.row}-${c.col}`}
+              className={`relative w-12 h-12 border border-gray-300 text-lg font-bold flex items-center justify-center cursor-pointer transition ${
+                tracing
+                  ? "bg-yellow-400 text-black scale-105"
+                  : "bg-white text-gray-800"
+              }`}
+              onMouseDown={() => onMouseDown(c)}
+              onMouseEnter={() => onMouseEnter(c)}
             >
-              <polygon points="0 0, 10 3.5, 0 7" fill="yellow" />
-            </marker>
-          </defs>
-        </svg>
-
-        {/* Grid Cells */}
-        <div
-          className={`grid gap-1 bg-white border-4 border-gray-200 shadow-md ${
-            {
-              4: "grid-cols-4 grid-rows-4",
-              5: "grid-cols-5 grid-rows-5",
-              6: "grid-cols-6 grid-rows-6",
-              7: "grid-cols-7 grid-rows-7",
-              8: "grid-cols-8 grid-rows-8",
-              9: "grid-cols-9 grid-rows-9",
-              10: "grid-cols-10 grid-rows-10",
-            }[GRID_SIZE] || "grid-cols-4 grid-rows-4"
-          }`}
-        >
-          {grid.flat().map((c) => {
-            const tracing = trace.some(
-              (t) => t.row === c.row && t.col === c.col
-            );
-            const currentIdx = trace.findIndex(
-              (t) => t.row === c.row && t.col === c.col
-            );
-            const prevCell = currentIdx > 0 ? trace[currentIdx - 1] : null;
-
-            return (
-              <div
-                key={`${c.row}-${c.col}`}
-                className={`relative w-12 h-12 border border-gray-300 text-lg font-bold flex items-center justify-center cursor-pointer transition ${
-                  tracing
-                    ? "bg-yellow-400 text-black scale-105"
-                    : "bg-white text-gray-800"
-                }`}
-                onMouseDown={() => onMouseDown(c)}
-                onMouseEnter={() => onMouseEnter(c)}
-              >
-                {c.letter.toUpperCase()}
-                {prevCell && (
-                  <div className="absolute -bottom-2 right-0 p-0.5">
-                    {getDirection(prevCell, c)}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+              {c.letter.toUpperCase()}
+              {prevCell && (
+                <div className="absolute -bottom-2 right-0 p-0.5">
+                  {getDirection(prevCell, c)}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Found Words */}

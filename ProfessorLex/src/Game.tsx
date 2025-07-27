@@ -61,21 +61,35 @@ function Game() {
     setGrid(cells);
   }
 
-  function onMouseDown(cell: Cell) {
-    setTrace([cell]);
+  function isAdjacent(a: Cell, b: Cell) {
+    const dr = Math.abs(a.row - b.row);
+    const dc = Math.abs(a.col - b.col);
+    return dr <= 1 && dc <= 1 && dr + dc > 0; // Must be neighbor, not same
   }
 
   function onMouseEnter(cell: Cell) {
     if (!trace.length) return;
-    const alreadyTraced = trace.some(
+
+    const last = trace[trace.length - 1];
+    const idxInTrace = trace.findIndex(
       (c) => c.row === cell.row && c.col === cell.col
     );
-    if (!alreadyTraced) {
-      const newTrace = [...trace, cell];
-      const prefix = newTrace.map((c) => c.letter).join("");
-      // Optionally skip prefix check to allow full freedom
-      setTrace(newTrace);
+
+    // Move backward in trace (untrace)
+    if (idxInTrace !== -1 && idxInTrace < trace.length - 1) {
+      setTrace(trace.slice(0, idxInTrace + 1));
+      return;
     }
+
+    // Add new cell if adjacent and not already in trace
+    const alreadyTraced = idxInTrace !== -1;
+    if (!alreadyTraced && isAdjacent(last, cell)) {
+      setTrace([...trace, cell]);
+    }
+  }
+
+  function onMouseDown(cell: Cell) {
+    setTrace([cell]);
   }
 
   function onMouseUp() {

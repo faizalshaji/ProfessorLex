@@ -25,27 +25,53 @@ export default function Cell({
   previousCell,
 }: CellProps) {
   const getDirection = () => {
-    if (!previousCell) return null;
+    if (!previousCell) return { icon: null, className: "" };
+
     const dr = cell.row - previousCell.row;
     const dc = cell.col - previousCell.col;
 
     if (dr === -1 && dc === 0)
-      return <ArrowUpIcon className="w-4 h-4 text-yellow-500" />;
+      return {
+        icon: <ArrowUpIcon className="w-4 h-4 text-yellow-500" />,
+        className: "top-0 left-1/2 -translate-x-1/2 -translate-y-1/2",
+      };
     if (dr === 1 && dc === 0)
-      return <ArrowDownIcon className="w-4 h-4 text-yellow-500" />;
+      return {
+        icon: <ArrowDownIcon className="w-4 h-4 text-yellow-500" />,
+        className: "bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2",
+      };
     if (dr === 0 && dc === -1)
-      return <ArrowLeftIcon className="w-4 h-4 text-yellow-500" />;
+      return {
+        icon: <ArrowLeftIcon className="w-4 h-4 text-yellow-500" />,
+        className: "left-0 top-1/2 -translate-y-1/2 -translate-x-1/2",
+      };
     if (dr === 0 && dc === 1)
-      return <ArrowRightIcon className="w-4 h-4 text-yellow-500" />;
+      return {
+        icon: <ArrowRightIcon className="w-4 h-4 text-yellow-500" />,
+        className: "right-0 top-1/2 -translate-y-1/2 translate-x-1/2",
+      };
     if (dr === -1 && dc === 1)
-      return <ArrowUpRightIcon className="w-4 h-4 text-yellow-500" />;
+      return {
+        icon: <ArrowUpRightIcon className="w-4 h-4 text-yellow-500" />,
+        className: "top-0 right-0 -translate-y-1/2 translate-x-1/2",
+      };
     if (dr === -1 && dc === -1)
-      return <ArrowUpLeftIcon className="w-4 h-4 text-yellow-500" />;
+      return {
+        icon: <ArrowUpLeftIcon className="w-4 h-4 text-yellow-500" />,
+        className: "top-0 left-0 -translate-x-1/2 -translate-y-1/2",
+      };
     if (dr === 1 && dc === 1)
-      return <ArrowDownRightIcon className="w-4 h-4 text-yellow-500" />;
+      return {
+        icon: <ArrowDownRightIcon className="w-4 h-4 text-yellow-500" />,
+        className: "bottom-0 right-0 translate-x-1/2 translate-y-1/2",
+      };
     if (dr === 1 && dc === -1)
-      return <ArrowDownLeftIcon className="w-4 h-4 text-yellow-500" />;
-    return null;
+      return {
+        icon: <ArrowDownLeftIcon className="w-4 h-4 text-yellow-500" />,
+        className: "bottom-0 left-0 -translate-x-1/2 translate-y-1/2",
+      };
+
+    return { icon: null, className: "" };
   };
 
   return (
@@ -60,9 +86,13 @@ export default function Cell({
       onMouseEnter={onMouseEnter}
     >
       {cell.letter.toUpperCase()}
-      {previousCell && (
-        <div className="absolute -bottom-2 right-0 p-0.5">{getDirection()}</div>
-      )}
+      {previousCell &&
+        (() => {
+          const { icon, className } = getDirection();
+          return icon ? (
+            <div className={`absolute ${className}`}>{icon}</div>
+          ) : null;
+        })()}
     </div>
   );
 }

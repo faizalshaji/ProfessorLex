@@ -1,9 +1,9 @@
-import Game from "../Game";
+import Board from "../Board/Board";
 
 function SinglePlayer() {
   return (
     <div className="single-player">
-      <Game></Game>
+      <Board></Board>
     </div>
   );
 }

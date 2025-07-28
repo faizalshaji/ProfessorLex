@@ -1,23 +1,14 @@
 import { useEffect, useState } from "react";
 import Trie from "trie-prefix-tree";
-import {
-  ArrowUpIcon,
-  ArrowDownIcon,
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  ArrowUpRightIcon,
-  ArrowUpLeftIcon,
-  ArrowDownRightIcon,
-  ArrowDownLeftIcon,
-} from "@heroicons/react/24/solid";
+import Cell from "./Cell";
 
-type Cell = { letter: string; row: number; col: number };
+type CellType = { letter: string; row: number; col: number };
 
 const GRID_SIZE = 10;
 
-function Game() {
-  const [grid, setGrid] = useState<Cell[][]>([]);
-  const [trace, setTrace] = useState<Cell[]>([]);
+function Board() {
+  const [grid, setGrid] = useState<CellType[][]>([]);
+  const [trace, setTrace] = useState<CellType[]>([]);
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [score, setScore] = useState(0);
   const [time, setTime] = useState(120);
@@ -27,9 +18,9 @@ function Game() {
     loadTrie().then((t) => {
       setTrie(t);
       initGrid();
-      const timer = setInterval(() => setTime((t) => Math.max(0, t - 1)), 1000);
-      return () => clearInterval(timer);
     });
+    const timer = setInterval(() => setTime((t) => Math.max(0, t - 1)), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   async function loadTrie(): Promise<any> {
@@ -50,7 +41,7 @@ function Game() {
     const letters = Array.from({ length: GRID_SIZE * GRID_SIZE }, () =>
       String.fromCharCode(97 + Math.floor(Math.random() * 26))
     );
-    const cells: Cell[][] = [];
+    const cells: CellType[][] = [];
     for (let r = 0; r < GRID_SIZE; r++) {
       cells.push([]);
       for (let c = 0; c < GRID_SIZE; c++) {
@@ -60,13 +51,13 @@ function Game() {
     setGrid(cells);
   }
 
-  function isAdjacent(a: Cell, b: Cell) {
+  function isAdjacent(a: CellType, b: CellType) {
     const dr = Math.abs(a.row - b.row);
     const dc = Math.abs(a.col - b.col);
     return dr <= 1 && dc <= 1 && dr + dc > 0;
   }
 
-  function onMouseEnter(cell: Cell) {
+  function onMouseEnter(cell: CellType) {
     if (!trace.length) return;
 
     const last = trace[trace.length - 1];
@@ -85,7 +76,7 @@ function Game() {
     }
   }
 
-  function onMouseDown(cell: Cell) {
+  function onMouseDown(cell: CellType) {
     setTrace([cell]);
   }
 
@@ -100,28 +91,6 @@ function Game() {
       setScore((s) => s + word.length);
     }
     setTrace([]);
-  }
-
-  function getDirection(from: Cell, to: Cell) {
-    const dr = to.row - from.row;
-    const dc = to.col - from.col;
-    if (dr === -1 && dc === 0)
-      return <ArrowUpIcon className="w-4 h-4 text-yellow-500" />;
-    if (dr === 1 && dc === 0)
-      return <ArrowDownIcon className="w-4 h-4 text-yellow-500" />;
-    if (dr === 0 && dc === -1)
-      return <ArrowLeftIcon className="w-4 h-4 text-yellow-500" />;
-    if (dr === 0 && dc === 1)
-      return <ArrowRightIcon className="w-4 h-4 text-yellow-500" />;
-    if (dr === -1 && dc === 1)
-      return <ArrowUpRightIcon className="w-4 h-4 text-yellow-500" />;
-    if (dr === -1 && dc === -1)
-      return <ArrowUpLeftIcon className="w-4 h-4 text-yellow-500" />;
-    if (dr === 1 && dc === 1)
-      return <ArrowDownRightIcon className="w-4 h-4 text-yellow-500" />;
-    if (dr === 1 && dc === -1)
-      return <ArrowDownLeftIcon className="w-4 h-4 text-yellow-500" />;
-    return null;
   }
 
   return (
@@ -142,7 +111,6 @@ function Game() {
         </p>
       </div>
 
-      {/* Grid */}
       <div
         className={`grid gap-1 bg-white border-4 border-gray-200 shadow-md mx-auto ${
           {
@@ -156,36 +124,28 @@ function Game() {
           }[GRID_SIZE]
         }`}
       >
-        {grid.flat().map((c) => {
-          const tracing = trace.some((t) => t.row === c.row && t.col === c.col);
-          const currentIdx = trace.findIndex(
-            (t) => t.row === c.row && t.col === c.col
+        {grid.flat().map((cell) => {
+          const isTracing = trace.some(
+            (t) => t.row === cell.row && t.col === cell.col
           );
-          const prevCell = currentIdx > 0 ? trace[currentIdx - 1] : null;
+          const currentIdx = trace.findIndex(
+            (t) => t.row === cell.row && t.col === cell.col
+          );
+          const previousCell = currentIdx > 0 ? trace[currentIdx - 1] : null;
 
           return (
-            <div
-              key={`${c.row}-${c.col}`}
-              className={`relative w-12 h-12 border border-gray-300 text-lg font-bold flex items-center justify-center cursor-pointer transition ${
-                tracing
-                  ? "bg-yellow-400 text-black scale-105"
-                  : "bg-white text-gray-800"
-              }`}
-              onMouseDown={() => onMouseDown(c)}
-              onMouseEnter={() => onMouseEnter(c)}
-            >
-              {c.letter.toUpperCase()}
-              {prevCell && (
-                <div className="absolute -bottom-2 right-0 p-0.5">
-                  {getDirection(prevCell, c)}
-                </div>
-              )}
-            </div>
+            <Cell
+              key={`${cell.row}-${cell.col}`}
+              cell={cell}
+              isTracing={isTracing}
+              previousCell={previousCell}
+              onMouseDown={() => onMouseDown(cell)}
+              onMouseEnter={() => onMouseEnter(cell)}
+            />
           );
         })}
       </div>
 
-      {/* Found Words */}
       <div className="mt-8">
         <h3 className="text-xl font-semibold text-pink-400">
           Found Words ({foundWords.length})
@@ -199,7 +159,6 @@ function Game() {
         </ul>
       </div>
 
-      {/* Game Over */}
       {time === 0 && (
         <div className="mt-8 text-red-400 text-xl font-bold">
           <h2>Game Over!</h2>
@@ -210,4 +169,4 @@ function Game() {
   );
 }
 
-export default Game;
+export default Board;

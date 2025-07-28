@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import Game from "../Game";
+import Board from "../Board/Board";
 
 function Multiplayer() {
   const { roomName } = useParams();
@@ -7,7 +7,7 @@ function Multiplayer() {
   return (
     <div className="multiplayer">
       <p>Room Name: {roomName}</p>
-      <Game></Game>
+      <Board></Board>
     </div>
   );
 }

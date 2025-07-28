@@ -5,7 +5,7 @@ type Props = {
   setTime: (value: number) => void;
 };
 
-const Configuration = ({ gridSize, time, setGridSize, setTime }: Props) => {
+const Config = ({ gridSize, time, setGridSize, setTime }: Props) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
@@ -39,4 +39,4 @@ const Configuration = ({ gridSize, time, setGridSize, setTime }: Props) => {
   );
 };
 
-export default Configuration;
+export default Config;

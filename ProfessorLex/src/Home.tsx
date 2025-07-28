@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Popup from "./Popup";
 import SinglePlayerConfig from "./Config/SinglePlayerConfig";
 import MultiplayerConfig from "./Config/MultiPlayerConfig";
 
 function Home() {
-  const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
   const [mode, setMode] = useState<"single" | "multi">("single");
 
@@ -14,31 +12,6 @@ function Home() {
 
   const [roomName, setRoomName] = useState("");
   const [error, setError] = useState("");
-
-  const handleStart = () => {
-    if (gridSize < 1 || time < 1) {
-      alert("Please enter valid values");
-      return;
-    }
-    navigate("/single", { state: { gridSize, time } });
-  };
-
-  const createRoom = () => {
-    if (gridSize < 1 || time < 1) {
-      alert("Please enter valid values");
-      return;
-    }
-    const roomId = Math.random().toString(36).substring(2, 8);
-    navigate(`/multiplayer/${roomId}`, { state: { gridSize, time } });
-  };
-
-  const handleJoinRoom = () => {
-    if (!roomName.trim()) {
-      setError("Room name is required");
-      return;
-    }
-    navigate(`/multiplayer/${roomName}`);
-  };
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center px-4 text-white">
@@ -83,7 +56,6 @@ function Home() {
               setGridSize={setGridSize}
               time={time}
               setTime={setTime}
-              onStart={handleStart}
             />
           ) : (
             <MultiplayerConfig
@@ -95,8 +67,6 @@ function Home() {
               setRoomName={setRoomName}
               error={error}
               setError={setError}
-              onCreate={createRoom}
-              onJoin={handleJoinRoom}
             />
           )}
         </div>

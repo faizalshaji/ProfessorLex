@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Config from "./Config";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   gridSize: number;
@@ -10,8 +11,6 @@ type Props = {
   setRoomName: (val: string) => void;
   error: string;
   setError: (val: string) => void;
-  onCreate: () => void;
-  onJoin: () => void;
 };
 
 function MultiplayerConfig({
@@ -23,14 +22,29 @@ function MultiplayerConfig({
   setRoomName,
   error,
   setError,
-  onCreate,
-  onJoin,
 }: Props) {
+  const navigate = useNavigate();
   const [multiMode, setMultiMode] = useState<"join" | "create">("join");
+
+  const createRoom = () => {
+    if (gridSize < 1 || time < 1) {
+      alert("Please enter valid values");
+      return;
+    }
+    const roomId = Math.random().toString(36).substring(2, 8);
+    navigate(`/multiplayer/${roomId}`, { state: { gridSize, time } });
+  };
+
+  const joinRoom = () => {
+    if (!roomName.trim()) {
+      setError("Room name is required");
+      return;
+    }
+    navigate(`/multiplayer/${roomName}`);
+  };
 
   return (
     <>
-      {/* Radio Buttons */}
       <div className="flex gap-4 mb-4">
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -67,7 +81,7 @@ function MultiplayerConfig({
           />
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button
-            onClick={onJoin}
+            onClick={joinRoom}
             className="w-full py-2 mt-4 bg-purple-600 hover:bg-purple-700 rounded-lg shadow-md"
           >
             Join Room
@@ -82,7 +96,7 @@ function MultiplayerConfig({
             setTime={setTime}
           />
           <button
-            onClick={onCreate}
+            onClick={createRoom}
             className="w-full py-2 mt-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-md"
           >
             Create Room

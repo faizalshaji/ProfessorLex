@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import Config from "./Config";
 
 type Props = {
@@ -5,16 +6,10 @@ type Props = {
   setGridSize: (val: number) => void;
   time: number;
   setTime: (val: number) => void;
-  onStart: () => void;
 };
 
-function SinglePlayerConfig({
-  gridSize,
-  setGridSize,
-  time,
-  setTime,
-  onStart,
-}: Props) {
+function SinglePlayerConfig({ gridSize, setGridSize, time, setTime }: Props) {
+  const navigate = useNavigate();
   return (
     <>
       <Config
@@ -24,7 +19,9 @@ function SinglePlayerConfig({
         setTime={setTime}
       />
       <button
-        onClick={onStart}
+        onClick={() => {
+          navigate("/singleplayer", { state: { gridSize, time } });
+        }}
         className="w-full py-2 mt-4 bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md"
       >
         Start Game

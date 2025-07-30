@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Trie from "trie-prefix-tree";
 import Cell from "./Cell";
 
 type CellType = { letter: string; row: number; col: number };
 
 const GRID_SIZE = 10;
+const CELL_SIZE = 48;
 
 function Board() {
   const [grid, setGrid] = useState<CellType[][]>([]);
@@ -14,6 +15,8 @@ function Board() {
   const [time, setTime] = useState(120);
   const [trie, setTrie] = useState<any>(null);
 
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   useEffect(() => {
     loadTrie().then((t) => {
       setTrie(t);
@@ -22,6 +25,10 @@ function Board() {
     const timer = setInterval(() => setTime((t) => Math.max(0, t - 1)), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    drawArrows(trace);
+  }, [trace]);
 
   async function loadTrie(): Promise<any> {
     const words = await loadWords();
@@ -93,9 +100,65 @@ function Board() {
     setTrace([]);
   }
 
+  function drawArrows(trace: CellType[]) {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Clear previous arrows
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "#ff4081";
+    ctx.fillStyle = "#ff4081";
+    ctx.lineWidth = 3;
+
+    // Gap between cells is 4px (gap-1 in Tailwind)
+    const GAP = 4;
+    const TOTAL_CELL_SIZE = CELL_SIZE + GAP;
+
+    for (let i = 0; i < trace.length - 1; i++) {
+      const from = trace[i];
+      const to = trace[i + 1];
+
+      // Calculate center positions including gaps
+      const x1 = from.col * TOTAL_CELL_SIZE + CELL_SIZE / 2;
+      const y1 = from.row * TOTAL_CELL_SIZE + CELL_SIZE / 2;
+      const x2 = to.col * TOTAL_CELL_SIZE + CELL_SIZE / 2;
+      const y2 = to.row * TOTAL_CELL_SIZE + CELL_SIZE / 2;
+
+      // Calculate angle and distances
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+      const headlen = Math.min(12, distance / 3); // Adjust arrowhead size based on distance
+
+      // Draw line
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      // Draw arrowhead
+      const arrowX = x2 - headlen * Math.cos(angle);
+      const arrowY = y2 - headlen * Math.sin(angle);
+
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(
+        arrowX - headlen * Math.cos(angle - Math.PI / 6),
+        arrowY - headlen * Math.sin(angle - Math.PI / 6)
+      );
+      ctx.lineTo(
+        arrowX - headlen * Math.cos(angle + Math.PI / 6),
+        arrowY - headlen * Math.sin(angle + Math.PI / 6)
+      );
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-slate-900 to-gray-800 text-white p-6 text-center select-none"
+      className="relative min-h-screen bg-gradient-to-br from-slate-900 to-gray-800 text-white p-6 text-center select-none"
       onMouseUp={onMouseUp}
     >
       <h1 className="text-4xl font-extrabold mb-6 tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
@@ -111,39 +174,49 @@ function Board() {
         </p>
       </div>
 
-      <div
-        className={`grid gap-1 bg-white border-4 border-gray-200 shadow-md mx-auto ${
-          {
-            4: "grid-cols-4 grid-rows-4",
-            5: "grid-cols-5 grid-rows-5",
-            6: "grid-cols-6 grid-rows-6",
-            7: "grid-cols-7 grid-rows-7",
-            8: "grid-cols-8 grid-rows-8",
-            9: "grid-cols-9 grid-rows-9",
-            10: "grid-cols-10 grid-rows-10",
-          }[GRID_SIZE]
-        }`}
-      >
-        {grid.flat().map((cell) => {
-          const isTracing = trace.some(
-            (t) => t.row === cell.row && t.col === cell.col
-          );
-          const currentIdx = trace.findIndex(
-            (t) => t.row === cell.row && t.col === cell.col
-          );
-          const previousCell = currentIdx > 0 ? trace[currentIdx - 1] : null;
+      <div className="relative inline-block">
+        {/* Canvas over the grid */}
+        <canvas
+          ref={canvasRef}
+          width={GRID_SIZE * (CELL_SIZE + 4) - 4}
+          height={GRID_SIZE * (CELL_SIZE + 4) - 4}
+          className="absolute left-0 top-0 z-10 pointer-events-none"
+        />
+        {/* Grid cells */}
+        <div
+          className={`grid gap-1 z-0 relative ${
+            {
+              4: "grid-cols-4",
+              5: "grid-cols-5",
+              6: "grid-cols-6",
+              7: "grid-cols-7",
+              8: "grid-cols-8",
+              9: "grid-cols-9",
+              10: "grid-cols-10",
+            }[GRID_SIZE]
+          }`}
+        >
+          {grid.flat().map((cell) => {
+            const isTracing = trace.some(
+              (t) => t.row === cell.row && t.col === cell.col
+            );
+            const currentIdx = trace.findIndex(
+              (t) => t.row === cell.row && t.col === cell.col
+            );
+            const previousCell = currentIdx > 0 ? trace[currentIdx - 1] : null;
 
-          return (
-            <Cell
-              key={`${cell.row}-${cell.col}`}
-              cell={cell}
-              isTracing={isTracing}
-              previousCell={previousCell}
-              onMouseDown={() => onMouseDown(cell)}
-              onMouseEnter={() => onMouseEnter(cell)}
-            />
-          );
-        })}
+            return (
+              <Cell
+                key={`${cell.row}-${cell.col}`}
+                cell={cell}
+                isTracing={isTracing}
+                previousCell={previousCell}
+                onMouseDown={() => onMouseDown(cell)}
+                onMouseEnter={() => onMouseEnter(cell)}
+              />
+            );
+          })}
+        </div>
       </div>
 
       <div className="mt-8">

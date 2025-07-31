@@ -14,12 +14,12 @@ export default function Cell({
 }: CellProps) {
   return (
     <div
-      className={`relative w-12 h-12 border border-gray-300 text-lg font-bold flex items-center justify-center cursor-pointer transition 
-        ${
-          isTracing
-            ? "bg-yellow-400 text-black scale-105"
-            : "bg-white text-gray-800"
-        }`}
+      className={`relative w-12 h-12 border border-gray-300 text-lg font-bold flex items-center justify-center cursor-default transition 
+          ${
+            isTracing
+              ? "bg-yellow-400 text-black scale-105"
+              : "bg-white text-gray-800"
+          }`}
       onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
     >

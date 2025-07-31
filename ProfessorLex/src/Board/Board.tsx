@@ -108,47 +108,98 @@ function Board() {
 
     // Clear previous arrows
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "#ff4081";
-    ctx.fillStyle = "#ff4081";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#ffffff";
+    ctx.fillStyle = "#ffffff";
+    ctx.lineWidth = 2.5;
 
     // Gap between cells is 8px (gap-2 in Tailwind)
     const GAP = 8;
     const TOTAL_CELL_SIZE = CELL_SIZE + GAP;
+    const EXTEND_INTO_CELL = 6;
+    // Diagonal adjustment factor (1/√2) to normalize diagonal lengths
+    const DIAGONAL_FACTOR = 0.707;
 
     for (let i = 0; i < trace.length - 1; i++) {
       const from = trace[i];
       const to = trace[i + 1];
 
-      // Calculate center positions including gaps
+      // Calculate cell centers
       const x1 = from.col * TOTAL_CELL_SIZE + CELL_SIZE / 2;
       const y1 = from.row * TOTAL_CELL_SIZE + CELL_SIZE / 2;
       const x2 = to.col * TOTAL_CELL_SIZE + CELL_SIZE / 2;
       const y2 = to.row * TOTAL_CELL_SIZE + CELL_SIZE / 2;
 
-      // Calculate angle and distances
-      const angle = Math.atan2(y2 - y1, x2 - x1);
-      const headlen = 8;
+      // Calculate direction
+      const dx = to.col - from.col;
+      const dy = to.row - from.row;
+
+      // Calculate arrow points (extending into cells)
+      let startX = x1,
+        startY = y1,
+        endX = x2,
+        endY = y2;
+      let extend = EXTEND_INTO_CELL;
+
+      if (dx === 0) {
+        // Vertical movement
+        startX = endX = x1;
+        if (dy > 0) {
+          startY = y1 + CELL_SIZE / 2 - extend;
+          endY = y2 - CELL_SIZE / 2 + extend;
+        } else {
+          startY = y1 - CELL_SIZE / 2 + extend;
+          endY = y2 + CELL_SIZE / 2 - extend;
+        }
+      } else if (dy === 0) {
+        // Horizontal movement
+        startY = endY = y1;
+        if (dx > 0) {
+          startX = x1 + CELL_SIZE / 2 - extend;
+          endX = x2 - CELL_SIZE / 2 + extend;
+        } else {
+          startX = x1 - CELL_SIZE / 2 + extend;
+          endX = x2 + CELL_SIZE / 2 - extend;
+        }
+      } else {
+        // Diagonal movement - adjust the extension length
+        extend = EXTEND_INTO_CELL * DIAGONAL_FACTOR;
+
+        if (dx > 0) {
+          startX = x1 + CELL_SIZE / 2 - extend;
+          endX = x2 - CELL_SIZE / 2 + extend;
+        } else {
+          startX = x1 - CELL_SIZE / 2 + extend;
+          endX = x2 + CELL_SIZE / 2 - extend;
+        }
+        if (dy > 0) {
+          startY = y1 + CELL_SIZE / 2 - extend;
+          endY = y2 - CELL_SIZE / 2 + extend;
+        } else {
+          startY = y1 - CELL_SIZE / 2 + extend;
+          endY = y2 + CELL_SIZE / 2 - extend;
+        }
+      }
+
+      // Calculate angle and draw smaller arrowhead
+      const angle = Math.atan2(endY - startY, endX - startX);
+      const headlen = 6;
 
       // Draw line
       ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
       ctx.stroke();
 
       // Draw arrowhead
-      const arrowX = x2 - headlen * Math.cos(angle);
-      const arrowY = y2 - headlen * Math.sin(angle);
-
       ctx.beginPath();
-      ctx.moveTo(x2, y2);
+      ctx.moveTo(endX, endY);
       ctx.lineTo(
-        arrowX - headlen * Math.cos(angle - Math.PI / 6),
-        arrowY - headlen * Math.sin(angle - Math.PI / 6)
+        endX - headlen * Math.cos(angle - Math.PI / 6),
+        endY - headlen * Math.sin(angle - Math.PI / 6)
       );
       ctx.lineTo(
-        arrowX - headlen * Math.cos(angle + Math.PI / 6),
-        arrowY - headlen * Math.sin(angle + Math.PI / 6)
+        endX - headlen * Math.cos(angle + Math.PI / 6),
+        endY - headlen * Math.sin(angle + Math.PI / 6)
       );
       ctx.closePath();
       ctx.fill();

@@ -110,10 +110,10 @@ function Board() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = "#ff4081";
     ctx.fillStyle = "#ff4081";
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2;
 
-    // Gap between cells is 4px (gap-1 in Tailwind)
-    const GAP = 4;
+    // Gap between cells is 8px (gap-2 in Tailwind)
+    const GAP = 8;
     const TOTAL_CELL_SIZE = CELL_SIZE + GAP;
 
     for (let i = 0; i < trace.length - 1; i++) {
@@ -128,8 +128,7 @@ function Board() {
 
       // Calculate angle and distances
       const angle = Math.atan2(y2 - y1, x2 - x1);
-      const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-      const headlen = Math.min(12, distance / 3); // Adjust arrowhead size based on distance
+      const headlen = 8;
 
       // Draw line
       ctx.beginPath();
@@ -178,13 +177,13 @@ function Board() {
         {/* Canvas over the grid */}
         <canvas
           ref={canvasRef}
-          width={GRID_SIZE * (CELL_SIZE + 4) - 4}
-          height={GRID_SIZE * (CELL_SIZE + 4) - 4}
+          width={GRID_SIZE * (CELL_SIZE + 8) - 8}
+          height={GRID_SIZE * (CELL_SIZE + 8) - 8}
           className="absolute left-0 top-0 z-10 pointer-events-none"
         />
         {/* Grid cells */}
         <div
-          className={`grid gap-1 z-0 relative ${
+          className={`grid gap-2 z-0 relative ${
             {
               4: "grid-cols-4",
               5: "grid-cols-5",

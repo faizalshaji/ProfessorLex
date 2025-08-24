@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Trie from "trie-prefix-tree";
 import Cell from "./Cell";
+import FoundWords from "../FoundWords/FoundWords";
+import GameOver from "../GameOver";
 
 type CellType = { letter: string; row: number; col: number };
 
@@ -269,25 +271,9 @@ function Board() {
         </div>
       </div>
 
-      <div className="mt-8">
-        <h3 className="text-xl font-semibold text-pink-400">
-          Found Words ({foundWords.length})
-        </h3>
-        <ul className="mt-2 space-y-1 text-gray-100">
-          {foundWords.map((w) => (
-            <li key={w} className="text-sm">
-              {w}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <FoundWords words={foundWords} />
 
-      {time === 0 && (
-        <div className="mt-8 text-red-400 text-xl font-bold">
-          <h2>Game Over!</h2>
-          <p className="mt-1 text-white">Your score: {score}</p>
-        </div>
-      )}
+      {time === 0 && <GameOver score={score} />}
     </div>
   );
 }

@@ -33,15 +33,24 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameOverSoundPlayed = useRef(false);
+  const gameStarted = useRef(false);
+  const initialLoadComplete = useRef(false);
 
   useEffect(() => {
+    // Initial load only happens once
+    if (initialLoadComplete.current) return;
+
     // Initialize grid immediately with random letters
     initGrid();
 
     // Then load the trie and reinitialize grid with word validation
     loadTrie().then((t) => {
       setTrie(t);
-      initGrid();
+      // Only reinitialize if game hasn't started
+      if (!gameStarted.current) {
+        initGrid();
+      }
+      initialLoadComplete.current = true;
     });
   }, []);
 
@@ -51,6 +60,10 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
 
     const timer = setInterval(() => {
       setTime((t) => {
+        if (t === initialTime) {
+          // Game just started
+          gameStarted.current = true;
+        }
         const newTime = Math.max(0, t - 1);
         if (newTime === 0 && !gameOverSoundPlayed.current) {
           setIsGameOver(true);
@@ -62,7 +75,7 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isGameOver]); // Reset timer when isGameOver changes
+  }, [isGameOver, initialTime]); // Reset timer when isGameOver changes
 
   useEffect(() => {
     drawArrows(trace);
@@ -84,6 +97,9 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
 
   const restartGame = async () => {
     try {
+      // Reset game started flag
+      gameStarted.current = false;
+
       // Reset all game state synchronously
       setFoundWords([]);
       onWordsChange([]);

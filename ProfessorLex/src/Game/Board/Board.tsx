@@ -7,6 +7,7 @@ import {
   playValidWord,
   playInvalidWord,
   playGameOver,
+  playSelectLetter,
 } from "../../utils/sound";
 
 type CellType = { letter: string; row: number; col: number };
@@ -130,12 +131,14 @@ function Board({ onWordsChange }: BoardProps) {
     const alreadyTraced = idxInTrace !== -1;
     if (!alreadyTraced && isAdjacent(last, cell)) {
       setTrace([...trace, cell]);
+      playSelectLetter();
     }
   }
 
   function onMouseDown(cell: CellType) {
     if (isGameOver || time === 0) return;
     setTrace([cell]);
+    playSelectLetter();
   }
 
   function onMouseUp() {

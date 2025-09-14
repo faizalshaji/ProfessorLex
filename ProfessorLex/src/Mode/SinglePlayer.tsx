@@ -3,7 +3,7 @@ import Game from "../Game/Game";
 
 function SinglePlayer() {
   const location = useLocation();
-  const { gridSize, time } = location.state || { gridSize: 10, time: 120 };
+  const { gridSize, time } = location.state || { gridSize: 5, time: 60 };
 
   return (
     <div className="single-player">

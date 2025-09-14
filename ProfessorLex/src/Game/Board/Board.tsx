@@ -21,11 +21,7 @@ interface BoardProps {
   initialTime?: number;
 }
 
-function Board({
-  onWordsChange,
-  gridSize = 10,
-  initialTime = 120,
-}: BoardProps) {
+function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
   const GRID_SIZE = gridSize;
   const [grid, setGrid] = useState<CellType[][]>([]);
   const [trace, setTrace] = useState<CellType[]>([]);

@@ -7,8 +7,8 @@ function Home() {
   const [showPopup, setShowPopup] = useState(false);
   const [mode, setMode] = useState<"single" | "multi">("single");
 
-  const [gridSize, setGridSize] = useState<number>(3);
-  const [time, setTime] = useState<number>(30);
+  const [gridSize, setGridSize] = useState<number>(5);
+  const [time, setTime] = useState<number>(60);
 
   const [roomName, setRoomName] = useState("");
   const [error, setError] = useState("");

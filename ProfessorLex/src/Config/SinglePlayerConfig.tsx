@@ -20,9 +20,17 @@ function SinglePlayerConfig({ gridSize, setGridSize, time, setTime }: Props) {
       />
       <button
         onClick={() => {
-          navigate("/singleplayer", { state: { gridSize, time } });
+          // Ensure valid values before starting
+          const validGridSize = Math.min(Math.max(3, gridSize), 10);
+          const validTime = Math.min(Math.max(30, time), 300);
+          navigate("/singleplayer", {
+            state: {
+              gridSize: validGridSize,
+              time: validTime,
+            },
+          });
         }}
-        className="w-full py-2 mt-4 bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md"
+        className="w-full py-3 mt-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-lg shadow-md transition duration-200"
       >
         Start Game
       </button>

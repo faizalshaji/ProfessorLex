@@ -39,6 +39,12 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
       setTrie(t);
       initGrid();
     });
+  }, []);
+
+  // Separate timer effect that depends on isGameOver
+  useEffect(() => {
+    if (isGameOver) return; // Don't start timer if game is over
+
     const timer = setInterval(() => {
       setTime((t) => {
         const newTime = Math.max(0, t - 1);
@@ -50,8 +56,9 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
         return newTime;
       });
     }, 1000);
+
     return () => clearInterval(timer);
-  }, []);
+  }, [isGameOver]); // Reset timer when isGameOver changes
 
   useEffect(() => {
     drawArrows(trace);
@@ -73,17 +80,19 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
 
   const restartGame = async () => {
     try {
-      // Reset game state first
+      // Reset all game state synchronously
       setFoundWords([]);
       onWordsChange([]);
       setTrace([]);
       setScore(0);
-      setTime(initialTime); // Use the initialTime prop
-      setIsGameOver(false);
-      gameOverSoundPlayed.current = false;
+      setTime(initialTime);
 
       // Initialize new grid
       initGrid();
+
+      // Reset game over state last
+      setIsGameOver(false);
+      gameOverSoundPlayed.current = false;
 
       // Ensure we have the trie
       if (!trie) {

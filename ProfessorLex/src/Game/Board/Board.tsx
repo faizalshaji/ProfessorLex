@@ -73,31 +73,27 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
 
   const restartGame = async () => {
     try {
-      // Reset game over state and sound flag
-      setIsGameOver(false);
-      gameOverSoundPlayed.current = false;
-
-      // Then reset all other state in a Promise
-      await Promise.resolve();
-
-      // First ensure we have the trie
-      if (!trie) {
-        const t = await loadTrie();
-        setTrie(t);
-      } // Reset all game state
-      setTime(120);
-      setScore(0);
+      // Reset game state first
       setFoundWords([]);
       onWordsChange([]);
       setTrace([]);
+      setScore(0);
+      setTime(initialTime); // Use the initialTime prop
+      setIsGameOver(false);
+      gameOverSoundPlayed.current = false;
 
       // Initialize new grid
       initGrid();
+
+      // Ensure we have the trie
+      if (!trie) {
+        const t = await loadTrie();
+        setTrie(t);
+      }
     } catch (error) {
       console.error("Error restarting game:", error);
     }
   };
-
   function initGrid() {
     const letters = Array.from({ length: GRID_SIZE * GRID_SIZE }, () =>
       String.fromCharCode(97 + Math.floor(Math.random() * 26))

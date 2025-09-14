@@ -3,6 +3,11 @@ import Trie from "trie-prefix-tree";
 import Cell from "./Cell";
 import FoundWords from "../FoundWords/FoundWords";
 import GameOver from "../GameOver";
+import {
+  playValidWord,
+  playInvalidWord,
+  playGameOver,
+} from "../../utils/sound";
 
 type CellType = { letter: string; row: number; col: number };
 
@@ -23,6 +28,7 @@ function Board({ onWordsChange }: BoardProps) {
   const [trie, setTrie] = useState<any>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const gameOverSoundPlayed = useRef(false);
 
   useEffect(() => {
     loadTrie().then((t) => {
@@ -32,8 +38,10 @@ function Board({ onWordsChange }: BoardProps) {
     const timer = setInterval(() => {
       setTime((t) => {
         const newTime = Math.max(0, t - 1);
-        if (newTime === 0) {
+        if (newTime === 0 && !gameOverSoundPlayed.current) {
           setIsGameOver(true);
+          playGameOver();
+          gameOverSoundPlayed.current = true;
         }
         return newTime;
       });
@@ -61,8 +69,9 @@ function Board({ onWordsChange }: BoardProps) {
 
   const restartGame = async () => {
     try {
-      // Reset game over state first
+      // Reset game over state and sound flag
       setIsGameOver(false);
+      gameOverSoundPlayed.current = false;
 
       // Then reset all other state in a Promise
       await Promise.resolve();
@@ -71,9 +80,7 @@ function Board({ onWordsChange }: BoardProps) {
       if (!trie) {
         const t = await loadTrie();
         setTrie(t);
-      }
-
-      // Reset all game state
+      } // Reset all game state
       setTime(120);
       setScore(0);
       setFoundWords([]);
@@ -138,11 +145,18 @@ function Board({ onWordsChange }: BoardProps) {
       return;
     }
     const word = trace.map((c) => c.letter).join("");
-    if (word.length > 2 && trie.hasWord(word) && !foundWords.includes(word)) {
-      const newWords = [...foundWords, word];
-      setFoundWords(newWords);
-      onWordsChange(newWords);
-      setScore((s) => s + word.length);
+    if (word.length > 2) {
+      if (trie.hasWord(word) && !foundWords.includes(word)) {
+        const newWords = [...foundWords, word];
+        setFoundWords(newWords);
+        onWordsChange(newWords);
+        setScore((s) => s + word.length);
+        console.log("Playing valid word sound...");
+        playValidWord();
+      } else {
+        console.log("Playing invalid word sound...");
+        playInvalidWord();
+      }
     }
     setTrace([]);
   }

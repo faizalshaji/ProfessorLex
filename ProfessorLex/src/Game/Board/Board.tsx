@@ -17,14 +17,21 @@ const CELL_SIZE = 48;
 
 interface BoardProps {
   onWordsChange: (words: string[]) => void;
+  gridSize?: number;
+  initialTime?: number;
 }
 
-function Board({ onWordsChange }: BoardProps) {
+function Board({
+  onWordsChange,
+  gridSize = 10,
+  initialTime = 120,
+}: BoardProps) {
+  const GRID_SIZE = gridSize;
   const [grid, setGrid] = useState<CellType[][]>([]);
   const [trace, setTrace] = useState<CellType[]>([]);
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [score, setScore] = useState(0);
-  const [time, setTime] = useState(120);
+  const [time, setTime] = useState(initialTime);
   const [isGameOver, setIsGameOver] = useState(false);
   const [trie, setTrie] = useState<any>(null);
 

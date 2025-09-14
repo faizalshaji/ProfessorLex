@@ -2,7 +2,12 @@ import { useState } from "react";
 import Board from "./Board/Board";
 import FoundWords from "./FoundWords/FoundWords";
 
-export default function Game() {
+interface GameProps {
+  gridSize?: number;
+  time?: number;
+}
+
+export default function Game({ gridSize, time }: GameProps) {
   const [foundWords, setFoundWords] = useState<string[]>([]);
 
   return (
@@ -14,7 +19,11 @@ export default function Game() {
 
       {/* Center Section */}
       <div className="flex-1 flex items-center justify-center">
-        <Board onWordsChange={setFoundWords} />
+        <Board
+          onWordsChange={setFoundWords}
+          gridSize={gridSize}
+          initialTime={time}
+        />
       </div>
 
       {/* Right Section */}

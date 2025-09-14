@@ -59,6 +59,34 @@ function Board({ onWordsChange }: BoardProps) {
     return words;
   }
 
+  const restartGame = async () => {
+    try {
+      // Reset game over state first
+      setIsGameOver(false);
+
+      // Then reset all other state in a Promise
+      await Promise.resolve();
+
+      // First ensure we have the trie
+      if (!trie) {
+        const t = await loadTrie();
+        setTrie(t);
+      }
+
+      // Reset all game state
+      setTime(120);
+      setScore(0);
+      setFoundWords([]);
+      onWordsChange([]);
+      setTrace([]);
+
+      // Initialize new grid
+      initGrid();
+    } catch (error) {
+      console.error("Error restarting game:", error);
+    }
+  };
+
   function initGrid() {
     const letters = Array.from({ length: GRID_SIZE * GRID_SIZE }, () =>
       String.fromCharCode(97 + Math.floor(Math.random() * 26))
@@ -245,7 +273,7 @@ function Board({ onWordsChange }: BoardProps) {
 
       <div className="relative inline-block">
         {isGameOver && (
-          <div className="absolute inset-0 z-20 bg-black/70 backdrop-blur-sm flex items-center justify-center rounded-lg">
+          <div className="absolute inset-0 z-20 bg-black/70 backdrop-blur-sm flex items-center justify-center">
             <div className="text-center p-8">
               <h2 className="text-4xl font-bold text-red-400 mb-6">
                 Game Over!
@@ -257,14 +285,7 @@ function Board({ onWordsChange }: BoardProps) {
                 Found Words: {foundWords.length}
               </p>
               <button
-                onClick={() => {
-                  setIsGameOver(false);
-                  setTime(120);
-                  setScore(0);
-                  setFoundWords([]);
-                  setTrace([]);
-                  initGrid();
-                }}
+                onClick={restartGame}
                 className="mt-6 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
               >
                 Play Again

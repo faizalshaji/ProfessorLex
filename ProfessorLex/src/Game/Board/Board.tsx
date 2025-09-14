@@ -9,12 +9,17 @@ type CellType = { letter: string; row: number; col: number };
 const GRID_SIZE = 10;
 const CELL_SIZE = 48;
 
-function Board() {
+interface BoardProps {
+  onWordsChange: (words: string[]) => void;
+}
+
+function Board({ onWordsChange }: BoardProps) {
   const [grid, setGrid] = useState<CellType[][]>([]);
   const [trace, setTrace] = useState<CellType[]>([]);
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [score, setScore] = useState(0);
   const [time, setTime] = useState(120);
+  const [isGameOver, setIsGameOver] = useState(false);
   const [trie, setTrie] = useState<any>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,7 +29,15 @@ function Board() {
       setTrie(t);
       initGrid();
     });
-    const timer = setInterval(() => setTime((t) => Math.max(0, t - 1)), 1000);
+    const timer = setInterval(() => {
+      setTime((t) => {
+        const newTime = Math.max(0, t - 1);
+        if (newTime === 0) {
+          setIsGameOver(true);
+        }
+        return newTime;
+      });
+    }, 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -67,7 +80,7 @@ function Board() {
   }
 
   function onMouseEnter(cell: CellType) {
-    if (!trace.length) return;
+    if (!trace.length || isGameOver || time === 0) return;
 
     const last = trace[trace.length - 1];
     const idxInTrace = trace.findIndex(
@@ -86,17 +99,21 @@ function Board() {
   }
 
   function onMouseDown(cell: CellType) {
+    if (isGameOver || time === 0) return;
     setTrace([cell]);
   }
 
   function onMouseUp() {
+    if (isGameOver || time === 0) return;
     if (!trace.length || !trie) {
       setTrace([]);
       return;
     }
     const word = trace.map((c) => c.letter).join("");
     if (word.length > 2 && trie.hasWord(word) && !foundWords.includes(word)) {
-      setFoundWords([...foundWords, word]);
+      const newWords = [...foundWords, word];
+      setFoundWords(newWords);
+      onWordsChange(newWords);
       setScore((s) => s + word.length);
     }
     setTrace([]);
@@ -227,6 +244,34 @@ function Board() {
       </div>
 
       <div className="relative inline-block">
+        {isGameOver && (
+          <div className="absolute inset-0 z-20 bg-black/70 backdrop-blur-sm flex items-center justify-center rounded-lg">
+            <div className="text-center p-8">
+              <h2 className="text-4xl font-bold text-red-400 mb-6">
+                Game Over!
+              </h2>
+              <p className="text-3xl font-semibold text-white mb-4">
+                Score: {score}
+              </p>
+              <p className="text-xl text-emerald-400 mb-2">
+                Found Words: {foundWords.length}
+              </p>
+              <button
+                onClick={() => {
+                  setIsGameOver(false);
+                  setTime(120);
+                  setScore(0);
+                  setFoundWords([]);
+                  setTrace([]);
+                  initGrid();
+                }}
+                className="mt-6 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
+              >
+                Play Again
+              </button>
+            </div>
+          </div>
+        )}
         {/* Canvas over the grid */}
         <canvas
           ref={canvasRef}
@@ -270,8 +315,6 @@ function Board() {
           })}
         </div>
       </div>
-
-      <FoundWords words={foundWords} />
 
       {time === 0 && <GameOver score={score} />}
     </div>

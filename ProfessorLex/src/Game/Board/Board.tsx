@@ -35,6 +35,10 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
   const gameOverSoundPlayed = useRef(false);
 
   useEffect(() => {
+    // Initialize grid immediately with random letters
+    initGrid();
+
+    // Then load the trie and reinitialize grid with word validation
     loadTrie().then((t) => {
       setTrie(t);
       initGrid();
@@ -103,18 +107,159 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
       console.error("Error restarting game:", error);
     }
   };
-  function initGrid() {
-    const letters = Array.from({ length: GRID_SIZE * GRID_SIZE }, () =>
-      String.fromCharCode(97 + Math.floor(Math.random() * 26))
-    );
+  function findAllWords(grid: CellType[][]): string[] {
+    const allWords: Set<string> = new Set();
+    if (!trie) return [];
+
+    const maxWordLength = Math.min(GRID_SIZE * 2, 8); // Scale with grid size, max 8
+
+    function dfs(
+      row: number,
+      col: number,
+      visited: boolean[][],
+      currentWord: string
+    ) {
+      if (currentWord.length > maxWordLength) return; // Scale with grid size
+
+      if (currentWord.length >= 3 && trie.hasWord(currentWord.toLowerCase())) {
+        allWords.add(currentWord.toLowerCase());
+      }
+
+      const dirs = [
+        [-1, -1],
+        [-1, 0],
+        [-1, 1],
+        [0, -1],
+        [0, 1],
+        [1, -1],
+        [1, 0],
+        [1, 1],
+      ];
+      for (const [dx, dy] of dirs) {
+        const newRow = row + dx;
+        const newCol = col + dy;
+
+        if (
+          newRow >= 0 &&
+          newRow < GRID_SIZE &&
+          newCol >= 0 &&
+          newCol < GRID_SIZE &&
+          !visited[newRow][newCol]
+        ) {
+          visited[newRow][newCol] = true;
+          dfs(
+            newRow,
+            newCol,
+            visited,
+            currentWord + grid[newRow][newCol].letter
+          );
+          visited[newRow][newCol] = false;
+        }
+      }
+    }
+
+    for (let i = 0; i < GRID_SIZE; i++) {
+      for (let j = 0; j < GRID_SIZE; j++) {
+        const visited = Array(GRID_SIZE)
+          .fill(null)
+          .map(() => Array(GRID_SIZE).fill(false));
+        visited[i][j] = true;
+        dfs(i, j, visited, grid[i][j].letter);
+      }
+    }
+
+    return Array.from(allWords);
+  }
+
+  function generateGrid(): CellType[][] {
+    const randomLetter = () => {
+      // More sophisticated letter distribution based on English letter frequency
+      const letterPool = {
+        vowels: { letters: "aeiou", weight: 0.38 },
+        common: { letters: "rstln", weight: 0.35 },
+        medium: { letters: "dcmpbg", weight: 0.2 },
+        rare: { letters: "fhvwykjxqz", weight: 0.07 },
+      };
+
+      const rand = Math.random();
+      let pool;
+      if (rand < letterPool.vowels.weight) pool = letterPool.vowels;
+      else if (rand < letterPool.vowels.weight + letterPool.common.weight)
+        pool = letterPool.common;
+      else if (
+        rand <
+        letterPool.vowels.weight +
+          letterPool.common.weight +
+          letterPool.medium.weight
+      )
+        pool = letterPool.medium;
+      else pool = letterPool.rare;
+
+      return pool.letters.charAt(
+        Math.floor(Math.random() * pool.letters.length)
+      );
+    };
+
     const cells: CellType[][] = [];
     for (let r = 0; r < GRID_SIZE; r++) {
       cells.push([]);
       for (let c = 0; c < GRID_SIZE; c++) {
-        cells[r].push({ letter: letters.pop()!, row: r, col: c });
+        cells[r].push({ letter: randomLetter(), row: r, col: c });
       }
     }
-    setGrid(cells);
+    return cells;
+  }
+
+  function calculateMinWords(size: number): number {
+    // Increased minimum words for better gameplay:
+    // 4x4 -> 25 words minimum
+    // 5x5 -> 35 words minimum
+    // 6x6 -> 50 words minimum
+    // 7x7 -> 70 words minimum
+    return Math.floor(Math.pow(size - 1, 2) * 1.5);
+  }
+
+  function initGrid() {
+    // If trie is not loaded, generate a simple grid without word validation
+    if (!trie) {
+      const simpleGrid = generateGrid();
+      setGrid(simpleGrid);
+      return;
+    }
+
+    let attempts = 0;
+    const maxAttempts = 100; // Increased max attempts to ensure we meet minimum
+    const minRequiredWords = calculateMinWords(GRID_SIZE);
+
+    let bestGrid = generateGrid();
+    let bestWordCount = findAllWords(bestGrid).length;
+
+    while (attempts < maxAttempts) {
+      const newGrid = generateGrid();
+      const wordCount = findAllWords(newGrid).length;
+
+      if (wordCount >= minRequiredWords) {
+        // We found a grid that meets our minimum requirement - use it immediately
+        console.log(
+          `Grid generated with ${wordCount} findable words (minimum: ${minRequiredWords}) after ${
+            attempts + 1
+          } attempts`
+        );
+        setGrid(newGrid);
+        return;
+      }
+
+      if (wordCount > bestWordCount) {
+        bestGrid = newGrid;
+        bestWordCount = wordCount;
+      }
+      attempts++;
+    }
+
+    console.log(
+      `Grid generated with ${bestWordCount} findable words after ${attempts} attempts`
+    );
+    setGrid(bestGrid);
   }
 
   function isAdjacent(a: CellType, b: CellType) {
@@ -149,6 +294,18 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
     playSelectLetter();
   }
 
+  function calculateWordScore(wordLength: number): number {
+    // Base score: 10 points per letter
+    const baseScore = wordLength * 10;
+
+    // Exponential bonus for letters over 3
+    // For each letter over 3, multiply bonus by 1.5
+    const extraLetters = Math.max(0, wordLength - 3);
+    const bonus = extraLetters > 0 ? Math.pow(1.5, extraLetters - 1) * 20 : 0;
+
+    return Math.floor(baseScore + bonus);
+  }
+
   function onMouseUp() {
     if (isGameOver || time === 0) return;
     if (!trace.length || !trie) {
@@ -161,11 +318,9 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
         const newWords = [...foundWords, word];
         setFoundWords(newWords);
         onWordsChange(newWords);
-        setScore((s) => s + word.length);
-        console.log("Playing valid word sound...");
+        setScore((s) => s + calculateWordScore(word.length));
         playValidWord();
       } else {
-        console.log("Playing invalid word sound...");
         playInvalidWord();
       }
     }

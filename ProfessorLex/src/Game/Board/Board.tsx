@@ -19,9 +19,15 @@ interface BoardProps {
   onWordsChange: (words: string[]) => void;
   gridSize?: number;
   initialTime?: number;
+  gameStarted?: boolean;
 }
 
-function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
+function Board({
+  onWordsChange,
+  gridSize = 5,
+  initialTime = 60,
+  gameStarted: isGameEnabled = false,
+}: BoardProps) {
   const GRID_SIZE = gridSize;
   const [grid, setGrid] = useState<CellType[][]>([]);
   const [trace, setTrace] = useState<CellType[]>([]);
@@ -56,7 +62,7 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
 
   // Separate timer effect that depends on isGameOver
   useEffect(() => {
-    if (isGameOver) return; // Don't start timer if game is over
+    if (isGameOver || !isGameEnabled) return; // Don't start timer if game is over or not enabled
 
     const timer = setInterval(() => {
       setTime((t) => {
@@ -75,7 +81,7 @@ function Board({ onWordsChange, gridSize = 5, initialTime = 60 }: BoardProps) {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isGameOver, initialTime]); // Reset timer when isGameOver changes
+  }, [isGameOver, initialTime, isGameEnabled]); // Reset timer when isGameOver or isGameEnabled changes
 
   useEffect(() => {
     drawArrows(trace);

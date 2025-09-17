@@ -26,11 +26,12 @@ export default function MultiplayerConfig(props: Props) {
     setError,
   } = props;
   const navigate = useNavigate();
-  const [multiMode, setMultiMode] = useState<"join" | "create">("join");
+  const [multiMode, setMultiMode] = useState<"join" | "create">("create");
+  const [playerName, setPlayerName] = useState("");
 
   const handleCreateRoom = async () => {
-    if (!roomName.trim()) {
-      setError("Room name is required");
+    if (!playerName.trim()) {
+      setError("Please enter your name");
       return;
     }
 
@@ -39,9 +40,8 @@ export default function MultiplayerConfig(props: Props) {
       return;
     }
 
-    debugger;
     try {
-      const result = await createRoom(roomName, roomName);
+      const result = await createRoom(playerName, playerName);
       if (!result) {
         setError("Failed to create room");
         return;
@@ -49,7 +49,8 @@ export default function MultiplayerConfig(props: Props) {
       navigate(`/multiplayer/${result.roomId}`, {
         state: {
           playerId: result.playerId,
-          playerName: roomName,
+          playerName: playerName,
+          isHost: true,
           gridSize,
           time,
         },
@@ -60,13 +61,18 @@ export default function MultiplayerConfig(props: Props) {
   };
 
   const handleJoinRoom = async () => {
+    if (!playerName.trim()) {
+      setError("Please enter your name");
+      return;
+    }
+
     if (!roomName.trim()) {
-      setError("Room name is required");
+      setError("Please enter room ID to join");
       return;
     }
 
     try {
-      const playerId = await joinRoom(roomName, roomName);
+      const playerId = await joinRoom(roomName, playerName);
       if (!playerId) {
         setError("Failed to join room");
         return;
@@ -74,7 +80,8 @@ export default function MultiplayerConfig(props: Props) {
       navigate(`/multiplayer/${roomName}`, {
         state: {
           playerId,
-          playerName: roomName,
+          playerName,
+          isHost: false,
           gridSize,
           time,
         },
@@ -112,21 +119,42 @@ export default function MultiplayerConfig(props: Props) {
 
       <div className="space-y-4">
         <div>
+          <label className="block text-sm font-medium text-gray-300 mb-1">
+            Your Name
+          </label>
           <input
             type="text"
-            placeholder="Enter Room Name"
-            value={roomName}
-            onChange={(e) => setRoomName(e.target.value)}
+            placeholder="Enter your name"
+            value={playerName}
+            onChange={(e) => setPlayerName(e.target.value)}
             className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400
               focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
               transition-all duration-200"
           />
-          {error && (
-            <p className="mt-2 text-red-400 text-sm bg-red-900/20 p-2 rounded">
-              {error}
-            </p>
-          )}
         </div>
+
+        {multiMode === "join" && (
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Room ID
+            </label>
+            <input
+              type="text"
+              placeholder="Enter room ID to join"
+              value={roomName}
+              onChange={(e) => setRoomName(e.target.value)}
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400
+                focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                transition-all duration-200"
+            />
+          </div>
+        )}
+
+        {error && (
+          <p className="mt-2 text-red-400 text-sm bg-red-900/20 p-2 rounded">
+            {error}
+          </p>
+        )}
 
         {multiMode === "create" && (
           <Config

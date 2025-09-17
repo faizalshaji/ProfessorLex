@@ -1,8 +1,9 @@
 import { useState } from "react";
-import Config from "./Config";
 import { useNavigate } from "react-router-dom";
+import { createRoom, joinRoom } from "../utils/firebase";
+import Config from "./Config";
 
-type Props = {
+interface Props {
   gridSize: number;
   setGridSize: (val: number) => void;
   time: number;
@@ -11,100 +12,144 @@ type Props = {
   setRoomName: (val: string) => void;
   error: string;
   setError: (val: string) => void;
-};
+}
 
-function MultiplayerConfig({
-  gridSize,
-  setGridSize,
-  time,
-  setTime,
-  roomName,
-  setRoomName,
-  error,
-  setError,
-}: Props) {
+export default function MultiplayerConfig(props: Props) {
+  const {
+    gridSize,
+    setGridSize,
+    time,
+    setTime,
+    roomName,
+    setRoomName,
+    error,
+    setError,
+  } = props;
   const navigate = useNavigate();
   const [multiMode, setMultiMode] = useState<"join" | "create">("join");
 
-  const createRoom = () => {
-    if (gridSize < 1 || time < 1) {
-      alert("Please enter valid values");
-      return;
-    }
-    const roomId = Math.random().toString(36).substring(2, 8);
-    navigate(`/multiplayer/${roomId}`, { state: { gridSize, time } });
-  };
-
-  const joinRoom = () => {
+  const handleCreateRoom = async () => {
     if (!roomName.trim()) {
       setError("Room name is required");
       return;
     }
-    navigate(`/multiplayer/${roomName}`);
+
+    if (gridSize < 1 || time < 1) {
+      setError("Please enter valid values for grid size and time");
+      return;
+    }
+
+    debugger;
+    try {
+      const result = await createRoom(roomName, roomName);
+      if (!result) {
+        setError("Failed to create room");
+        return;
+      }
+      navigate(`/multiplayer/${result.roomId}`, {
+        state: {
+          playerId: result.playerId,
+          playerName: roomName,
+          gridSize,
+          time,
+        },
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create room");
+    }
+  };
+
+  const handleJoinRoom = async () => {
+    if (!roomName.trim()) {
+      setError("Room name is required");
+      return;
+    }
+
+    try {
+      const playerId = await joinRoom(roomName, roomName);
+      if (!playerId) {
+        setError("Failed to join room");
+        return;
+      }
+      navigate(`/multiplayer/${roomName}`, {
+        state: {
+          playerId,
+          playerName: roomName,
+          gridSize,
+          time,
+        },
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to join room");
+    }
   };
 
   return (
-    <>
-      <div className="flex gap-4 mb-4">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="radio"
-            name="multiMode"
-            value="join"
-            checked={multiMode === "join"}
-            onChange={() => setMultiMode("join")}
-            className="form-radio text-purple-500"
-          />
-          Join
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="radio"
-            name="multiMode"
-            value="create"
-            checked={multiMode === "create"}
-            onChange={() => setMultiMode("create")}
-            className="form-radio text-purple-500"
-          />
-          Create
-        </label>
+    <div className="space-y-6">
+      {/* Mode Switch Buttons */}
+      <div className="flex bg-gray-800 p-1 rounded-lg">
+        <button
+          onClick={() => setMultiMode("join")}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+            multiMode === "join"
+              ? "bg-purple-600 text-white shadow-lg"
+              : "text-gray-300 hover:text-white"
+          }`}
+        >
+          Join Room
+        </button>
+        <button
+          onClick={() => setMultiMode("create")}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+            multiMode === "create"
+              ? "bg-purple-600 text-white shadow-lg"
+              : "text-gray-300 hover:text-white"
+          }`}
+        >
+          Create Room
+        </button>
       </div>
 
-      {multiMode === "join" ? (
-        <>
+      <div className="space-y-4">
+        <div>
           <input
             type="text"
             placeholder="Enter Room Name"
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
-            className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400
+              focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+              transition-all duration-200"
           />
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          <button
-            onClick={joinRoom}
-            className="w-full py-2 mt-4 bg-purple-600 hover:bg-purple-700 rounded-lg shadow-md"
-          >
-            Join Room
-          </button>
-        </>
-      ) : (
-        <>
+          {error && (
+            <p className="mt-2 text-red-400 text-sm bg-red-900/20 p-2 rounded">
+              {error}
+            </p>
+          )}
+        </div>
+
+        {multiMode === "create" && (
           <Config
             gridSize={gridSize}
             setGridSize={setGridSize}
             time={time}
             setTime={setTime}
           />
-          <button
-            onClick={createRoom}
-            className="w-full py-2 mt-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-md"
-          >
-            Create Room
-          </button>
-        </>
-      )}
-    </>
+        )}
+
+        <button
+          onClick={multiMode === "create" ? handleCreateRoom : handleJoinRoom}
+          className={`w-full py-3 rounded-lg shadow-lg transform hover:scale-[1.02] transition-all duration-200
+            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800
+            ${
+              multiMode === "create"
+                ? "bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white focus:ring-indigo-500"
+                : "bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white focus:ring-purple-500"
+            }`}
+        >
+          {multiMode === "create" ? "Create Room" : "Join Room"}
+        </button>
+      </div>
+    </div>
   );
 }
-
-export default MultiplayerConfig;

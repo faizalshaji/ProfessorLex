@@ -82,7 +82,7 @@ export const joinRoom = async (roomId: string, playerName: string) => {
   const snapshot = await new Promise((resolve) => {
     onValue(roomRef, resolve, { onlyOnce: true });
   });
-  
+
   const room = snapshot.val() as Room;
   if (!room) {
     throw new Error("Room not found");
@@ -122,24 +122,27 @@ export const updatePlayerScore = async (
 export const startGame = async (roomId: string, grid: any) => {
   const db = getDatabase();
   const roomRef = ref(db, `rooms/${roomId}`);
-  
+
   // First get the current room state
   const snapshot = await new Promise((resolve) => {
     onValue(roomRef, resolve, { onlyOnce: true });
   });
-  
+
   const room = snapshot.val() as Room;
   if (!room) return;
 
   // Ensure all players have foundWords array
-  const updatedPlayers = Object.entries(room.players).reduce((acc, [playerId, player]) => {
-    acc[playerId] = {
-      ...player,
-      score: player.score || 0,
-      foundWords: player.foundWords || [],
-    };
-    return acc;
-  }, {} as Record<string, RoomPlayer>);
+  const updatedPlayers = Object.entries(room.players).reduce(
+    (acc, [playerId, player]) => {
+      acc[playerId] = {
+        ...player,
+        score: player.score || 0,
+        foundWords: player.foundWords || [],
+      };
+      return acc;
+    },
+    {} as Record<string, RoomPlayer>
+  );
 
   // Update the room with the new state
   await update(ref(db, `rooms/${roomId}`), {

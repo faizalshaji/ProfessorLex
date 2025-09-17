@@ -42,15 +42,49 @@ function Multiplayer() {
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-900">
-      {/* Left Sidebar */}
-      <div className="w-64 bg-gray-800 text-white p-4 flex flex-col">
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-2">Room: {room.name}</h2>
-          <p className="text-sm text-gray-400">ID: {room.id}</p>
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* Room Info Bar */}
+      <div className="bg-gray-800 text-white p-4 flex-none">
+        <div className="container mx-auto flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold">Room: {room.name}</h2>
+            <p className="text-sm text-gray-400">ID: {room.id}</p>
+          </div>
+          {isHost && !gameStarted && (
+            <button
+              onClick={async () => {
+                if (room) {
+                  const grid = Array(gridSize)
+                    .fill(null)
+                    .map(() =>
+                      Array(gridSize)
+                        .fill(null)
+                        .map(() =>
+                          String.fromCharCode(
+                            65 + Math.floor(Math.random() * 26)
+                          )
+                        )
+                    );
+                  await startGame(roomName, grid);
+                }
+              }}
+              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded transition-colors"
+            >
+              Start Game
+            </button>
+          )}
+          {!isHost && !gameStarted && (
+            <div className="text-sm text-gray-400">
+              Waiting for host to start the game...
+            </div>
+          )}
         </div>
+      </div>
 
-        <div className="flex-1">
+      {/* Main Game Area with Scoreboard */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar - Players */}
+        <div className="w-64 bg-gray-800 text-white p-4 overflow-y-auto">
           <h3 className="text-lg font-semibold mb-3">Players</h3>
           <div className="space-y-2">
             {Object.values(room.players || {}).map((player: RoomPlayer) => (
@@ -76,48 +110,19 @@ function Multiplayer() {
           </div>
         </div>
 
-        {isHost && !gameStarted && (
-          <button
-            onClick={async () => {
-              if (room) {
-                // Generate a random grid or get it from the Board component
-                const grid = Array(gridSize)
-                  .fill(null)
-                  .map(() =>
-                    Array(gridSize)
-                      .fill(null)
-                      .map(() =>
-                        String.fromCharCode(65 + Math.floor(Math.random() * 26))
-                      )
-                  );
-                await startGame(roomName, grid);
-              }
+        {/* Game Component */}
+        <div className="flex-1">
+          <Game
+            gridSize={gridSize}
+            time={time}
+            gameStarted={gameStarted}
+            roomId={roomName}
+            playerId={playerId}
+            onUpdateScore={(words) => {
+              updatePlayerScore(roomName, playerId, words.length * 10, words);
             }}
-            className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors"
-          >
-            Start Game
-          </button>
-        )}
-
-        {!isHost && !gameStarted && (
-          <div className="mt-4 text-center text-sm text-gray-400">
-            Waiting for host to start the game...
-          </div>
-        )}
-      </div>
-
-      {/* Main Game Area */}
-      <div className="flex-1">
-        <Game
-          gridSize={gridSize}
-          time={time}
-          gameStarted={gameStarted}
-          roomId={roomName}
-          playerId={playerId}
-          onUpdateScore={(words) => {
-            updatePlayerScore(roomName, playerId, words.length * 10, words);
-          }}
-        />
+          />
+        </div>
       </div>
     </div>
   );

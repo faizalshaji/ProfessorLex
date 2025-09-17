@@ -42,21 +42,32 @@ export default function Game({
 
   return (
     <div className="flex h-full">
-      {/* Center Section - Game Board */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-3xl">
-          <Board
-            onWordsChange={handleWordsChange}
-            gridSize={gridSize}
-            initialTime={time}
-            gameStarted={gameStarted}
-          />
-
-          {/* Found Words Section */}
-          <div className="mt-8">
-            <FoundWords words={foundWords} />
-          </div>
+      {/* Left Section - Timer or Stats */}
+      <div className="w-64 flex items-center justify-center p-4 bg-gray-800 flex-none">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold mb-2 text-gray-200">
+            Game Stats
+          </h3>
+          <div className="text-gray-400">Score: {foundWords.length * 10}</div>
         </div>
+      </div>
+
+      {/* Center Section - Game Board */}
+      <div className="flex-1 flex items-center justify-center p-4 bg-gray-900">
+        <Board
+          onWordsChange={handleWordsChange}
+          gridSize={gridSize}
+          initialTime={time}
+          gameStarted={gameStarted}
+        />
+      </div>
+
+      {/* Right Section - Found Words */}
+      <div className="w-64 p-4 bg-gray-800 overflow-y-auto flex-none">
+        <h3 className="text-lg font-semibold mb-3 text-gray-200">
+          Found Words
+        </h3>
+        <FoundWords words={foundWords} />
       </div>
     </div>
   );

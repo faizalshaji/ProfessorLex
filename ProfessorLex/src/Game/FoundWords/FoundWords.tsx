@@ -15,20 +15,20 @@ export default function FoundWords({ words }: FoundWordsProps) {
   }, [words]);
 
   return (
-    <div className="w-64 p-6 bg-slate-800 rounded-lg shadow-lg">
-      <div className="mb-4">
-        <h3 className="text-2xl font-bold text-white">
-          Found Words <span className="text-emerald-400">({words.length})</span>
-        </h3>
+    <div className="h-full flex flex-col">
+      <div className="mb-2">
+        <span className="text-emerald-400 text-sm font-medium">
+          Found Words ({words.length})
+        </span>
       </div>
       <ul
         ref={listRef}
-        className="h-[400px] overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
+        className="flex-1 overflow-y-auto space-y-1 pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
       >
         {words.map((w) => (
           <li
             key={w}
-            className="text-lg py-2 px-3 border-b border-gray-700 text-emerald-400 font-medium first:border-t"
+            className="text-sm py-1 px-2 rounded bg-gray-700/50 text-emerald-400 font-medium"
           >
             {w.toUpperCase()}
           </li>

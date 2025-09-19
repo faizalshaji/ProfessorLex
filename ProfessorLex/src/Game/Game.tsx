@@ -1,20 +1,23 @@
 import { useState } from "react";
 import Board from "./Board/Board";
 import FoundWords from "./FoundWords/FoundWords";
+import { GameMode } from "../Enums/GameMode";
 
 interface GameProps {
+  mode: GameMode;
   gridSize?: number;
   time?: number;
-  gameStarted: boolean;
-  roomId: string;
-  playerId: string;
+  gameStarted?: boolean;
+  roomId?: string;
+  playerId?: string;
   onUpdateScore?: (words: string[]) => void;
 }
 
 export default function Game({
+  mode,
   gridSize,
   time,
-  gameStarted,
+  gameStarted = mode === GameMode.SinglePlayer,
   roomId,
   playerId,
   onUpdateScore,
@@ -34,7 +37,7 @@ export default function Game({
         <div className="text-center text-gray-400">
           <div className="text-3xl mb-4">🎲</div>
           <h2 className="text-xl font-semibold mb-2">Game Not Started</h2>
-          {roomId !== "single-player" ? (
+          {mode === GameMode.MultiPlayer ? (
             <p>Waiting for the room owner to start the game...</p>
           ) : (
             <p>Starting game...</p>
@@ -47,7 +50,7 @@ export default function Game({
   return (
     <div className="flex h-full">
       {/* Left Section - Timer or Stats (Only in Multiplayer) */}
-      {roomId !== "single-player" && (
+      {mode === GameMode.MultiPlayer && (
         <div className="w-64 flex items-center justify-center p-4 bg-gray-800 flex-none">
           <div className="text-center">
             <h3 className="text-lg font-semibold mb-2 text-gray-200">

@@ -4,6 +4,7 @@ import { getDatabase, ref, onValue } from "firebase/database";
 import Game from "../Game/Game";
 import type { Room, RoomPlayer } from "../Utils/firebase";
 import { startGame, updatePlayerScore } from "../Utils/firebase";
+import { GameMode } from "../Enums/GameMode";
 
 function Multiplayer() {
   const navigate = useNavigate();
@@ -109,6 +110,7 @@ function Multiplayer() {
 
         <div className="flex-1">
           <Game
+            mode={GameMode.MultiPlayer}
             gridSize={gridSize}
             time={time}
             gameStarted={gameStarted}

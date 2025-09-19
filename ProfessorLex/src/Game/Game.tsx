@@ -34,7 +34,11 @@ export default function Game({
         <div className="text-center text-gray-400">
           <div className="text-3xl mb-4">🎲</div>
           <h2 className="text-xl font-semibold mb-2">Game Not Started</h2>
-          <p>Waiting for the room owner to start the game...</p>
+          {roomId !== "single-player" ? (
+            <p>Waiting for the room owner to start the game...</p>
+          ) : (
+            <p>Starting game...</p>
+          )}
         </div>
       </div>
     );
@@ -42,15 +46,17 @@ export default function Game({
 
   return (
     <div className="flex h-full">
-      {/* Left Section - Timer or Stats */}
-      <div className="w-64 flex items-center justify-center p-4 bg-gray-800 flex-none">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold mb-2 text-gray-200">
-            Game Stats
-          </h3>
-          <div className="text-gray-400">Score: {foundWords.length * 10}</div>
+      {/* Left Section - Timer or Stats (Only in Multiplayer) */}
+      {roomId !== "single-player" && (
+        <div className="w-64 flex items-center justify-center p-4 bg-gray-800 flex-none">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold mb-2 text-gray-200">
+              Game Stats
+            </h3>
+            <div className="text-gray-400">Score: {foundWords.length * 10}</div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Center Section - Game Board */}
       <div className="flex-1 flex items-center justify-center p-4 bg-gray-900">

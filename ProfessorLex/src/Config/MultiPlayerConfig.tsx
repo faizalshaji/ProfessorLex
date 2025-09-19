@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { createRoom, joinRoom } from "../utils/firebase";
+import { createRoom, joinRoom } from "../Utils/firebase";
 import Config from "./Config";
 
 interface Props {
@@ -26,74 +26,102 @@ export default function MultiplayerConfig(props: Props) {
     setError,
   } = props;
   const navigate = useNavigate();
-  const [multiMode, setMultiMode] = useState<"join" | "create">("create");
+  const [multiMode, setMultiMode] = useState<"join" | "create">("join");
   const [playerName, setPlayerName] = useState("");
 
-  const handleCreateRoom = async () => {
-    if (!playerName.trim()) {
-      setError("Please enter your name");
-      return;
-    }
+  const [joinError, setJoinError] = useState("");
+  const [createError, setCreateError] = useState("");
 
-    if (gridSize < 1 || time < 1) {
-      setError("Please enter valid values for grid size and time");
-      return;
+  // Reset errors when switching modes
+  useEffect(() => {
+    setJoinError("");
+    setCreateError("");
+    setError("");
+  }, [multiMode, setError]);
+
+  // CREATE ROOM VALIDATION
+  useEffect(() => {
+    if (multiMode === "create") {
+      if (!playerName.trim()) {
+        setCreateError("Please enter your name");
+      } else if (gridSize < 5 || gridSize > 10) {
+        setCreateError("Grid size must be between 5 and 10");
+      } else if (time < 30 || time > 300) {
+        setCreateError("Time must be between 30 and 300 seconds");
+      } else {
+        setCreateError("");
+      }
     }
+  }, [playerName, gridSize, time, multiMode]);
+
+  // JOIN ROOM VALIDATION
+  useEffect(() => {
+    if (multiMode === "join") {
+      if (!playerName.trim()) {
+        setJoinError("Please enter your name");
+      } else if (!roomName.trim()) {
+        setJoinError("Please enter room ID to join");
+      } else {
+        setJoinError("");
+      }
+    }
+  }, [playerName, roomName, multiMode]);
+
+  const handleCreateRoom = async () => {
+    if (createError) return;
 
     try {
       const result = await createRoom(playerName, playerName);
       if (!result) {
-        setError("Failed to create room");
+        setCreateError("Failed to create room");
         return;
       }
       navigate(`/multiplayer/${result.roomId}`, {
         state: {
           playerId: result.playerId,
-          playerName: playerName,
+          playerName,
           isHost: true,
           gridSize,
           time,
         },
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create room");
+      setCreateError(
+        err instanceof Error ? err.message : "Failed to create room"
+      );
     }
   };
 
   const handleJoinRoom = async () => {
-    if (!playerName.trim()) {
-      setError("Please enter your name");
-      return;
-    }
-
-    if (!roomName.trim()) {
-      setError("Please enter room ID to join");
-      return;
-    }
+    if (joinError) return;
 
     try {
       const playerId = await joinRoom(roomName, playerName);
       if (!playerId) {
-        setError("Failed to join room");
+        setJoinError("Failed to join room");
         return;
       }
       navigate(`/multiplayer/${roomName}`, {
-        state: {
-          playerId,
-          playerName,
-          isHost: false,
-          gridSize,
-          time,
-        },
+        state: { playerId, playerName, isHost: false, gridSize, time },
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to join room");
+      setJoinError(err instanceof Error ? err.message : "Failed to join room");
     }
   };
 
+  // --- Common input style based on error ---
+  const getInputClass = (hasError: boolean) =>
+    `w-full px-4 py-3 bg-gray-800 border ${
+      hasError ? "border-red-500" : "border-gray-600"
+    } 
+     rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 
+     ${
+       hasError ? "focus:ring-red-500" : "focus:ring-purple-500"
+     } transition-all duration-200 text-lg`;
+
   return (
     <div className="space-y-6">
-      {/* Mode Switch Buttons */}
+      {/* Mode Switch */}
       <div className="flex bg-gray-800 p-1 rounded-lg">
         <button
           onClick={() => setMultiMode("join")}
@@ -117,45 +145,47 @@ export default function MultiplayerConfig(props: Props) {
         </button>
       </div>
 
+      {/* Inputs */}
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">
-            Your Name
-          </label>
+        {/* Player Name */}
+        <div className="flex flex-col gap-2">
+          <label className="text-lg font-semibold text-white">Your Name</label>
           <input
             type="text"
             placeholder="Enter your name"
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400
-              focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-              transition-all duration-200"
+            className={getInputClass(
+              (multiMode === "join" && joinError) ||
+                (multiMode === "create" && createError && !playerName)
+            )}
           />
+          {multiMode === "join" && joinError && !playerName && (
+            <span className="text-red-500 text-sm">{joinError}</span>
+          )}
+          {multiMode === "create" && createError && !playerName && (
+            <span className="text-red-500 text-sm">{createError}</span>
+          )}
         </div>
 
+        {/* Room ID - Join mode only */}
         {multiMode === "join" && (
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Room ID
-            </label>
+          <div className="flex flex-col gap-2">
+            <label className="text-lg font-semibold text-white">Room ID</label>
             <input
               type="text"
               placeholder="Enter room ID to join"
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400
-                focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                transition-all duration-200"
+              className={getInputClass(joinError && !roomName)}
             />
+            {joinError && !roomName && (
+              <span className="text-red-500 text-sm">{joinError}</span>
+            )}
           </div>
         )}
 
-        {error && (
-          <p className="mt-2 text-red-400 text-sm bg-red-900/20 p-2 rounded">
-            {error}
-          </p>
-        )}
-
+        {/* Config only for Create Mode */}
         {multiMode === "create" && (
           <Config
             gridSize={gridSize}
@@ -165,6 +195,7 @@ export default function MultiplayerConfig(props: Props) {
           />
         )}
 
+        {/* Action Button */}
         <button
           onClick={multiMode === "create" ? handleCreateRoom : handleJoinRoom}
           className={`w-full py-3 rounded-lg shadow-lg transform hover:scale-[1.02] transition-all duration-200

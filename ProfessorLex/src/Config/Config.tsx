@@ -11,7 +11,6 @@ const Config = ({ gridSize, time, setGridSize, setTime }: Props) => {
   const [gridSizeError, setGridSizeError] = useState("");
   const [timeError, setTimeError] = useState("");
 
-  // Validate inputs whenever they change
   useEffect(() => {
     if (gridSize < 5 || gridSize > 10) {
       setGridSizeError("Grid size must be between 5 and 10");
@@ -28,6 +27,11 @@ const Config = ({ gridSize, time, setGridSize, setTime }: Props) => {
     }
   }, [time]);
 
+  const parseNumber = (val: string) => {
+    const num = parseInt(val, 10);
+    return isNaN(num) ? 0 : num;
+  };
+
   return (
     <div className="space-y-8 bg-gray-800 p-6 rounded-lg shadow-lg">
       <div className="flex flex-col gap-3">
@@ -36,9 +40,9 @@ const Config = ({ gridSize, time, setGridSize, setTime }: Props) => {
         </label>
         <input
           id="gridSize"
-          type="number"
+          type="text"
           value={gridSize}
-          onChange={(e) => setGridSize(Number(e.target.value) || 5)}
+          onChange={(e) => setGridSize(parseNumber(e.target.value))}
           className={`bg-gray-700 border ${
             gridSizeError ? "border-red-500" : "border-gray-600"
           } text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 ${
@@ -60,9 +64,9 @@ const Config = ({ gridSize, time, setGridSize, setTime }: Props) => {
         </label>
         <input
           id="time"
-          type="number"
+          type="text"
           value={time}
-          onChange={(e) => setTime(Number(e.target.value) || 60)}
+          onChange={(e) => setTime(parseNumber(e.target.value))}
           className={`bg-gray-700 border ${
             timeError ? "border-red-500" : "border-gray-600"
           } text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 ${

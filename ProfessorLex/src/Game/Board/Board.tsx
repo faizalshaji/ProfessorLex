@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import Trie from "trie-prefix-tree";
 import Cell from "./Cell";
-import FoundWords from "../FoundWords/FoundWords";
 import GameOver from "../GameOver";
 import {
   playValidWord,
   playInvalidWord,
   playGameOver,
   playSelectLetter,
-} from "../../utils/sound";
+} from "../../Utils/sound";
 
 type CellType = { letter: string; row: number; col: number };
 

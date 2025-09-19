@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import { getDatabase, ref, onValue, update } from "firebase/database";
+import { getDatabase, ref, onValue } from "firebase/database";
 import Game from "../Game/Game";
-import type { Room, RoomPlayer } from "../utils/firebase";
-import { startGame, updatePlayerScore } from "../utils/firebase";
+import type { Room, RoomPlayer } from "../Utils/firebase";
+import { startGame, updatePlayerScore } from "../Utils/firebase";
 
 function Multiplayer() {
   const navigate = useNavigate();
@@ -43,7 +43,6 @@ function Multiplayer() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      {/* Room Info Bar */}
       <div className="bg-gray-800 text-white p-4 flex-none">
         <div className="container mx-auto flex justify-between items-center">
           <div>
@@ -81,9 +80,7 @@ function Multiplayer() {
         </div>
       </div>
 
-      {/* Main Game Area with Scoreboard */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar - Players */}
         <div className="w-64 bg-gray-800 text-white p-4 overflow-y-auto">
           <h3 className="text-lg font-semibold mb-3">Players</h3>
           <div className="space-y-2">
@@ -110,7 +107,6 @@ function Multiplayer() {
           </div>
         </div>
 
-        {/* Game Component */}
         <div className="flex-1">
           <Game
             gridSize={gridSize}

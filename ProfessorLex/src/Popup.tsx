@@ -10,7 +10,7 @@ const PopupDialog = ({ isOpen, onClose, title, children }: Props) => {
 
   return (
     <div className="fixed inset-0 bg-blue-300 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-xl w-72 max-w-[80%] shadow-lg text-center">
+      <div className="bg-yellow-500 p-6 rounded-xl w-72 max-w-[80%] shadow-lg text-center">
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
         <div className="mb-4">{children}</div>
         <button

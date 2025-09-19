@@ -333,13 +333,17 @@ function Board({
       setTrace([]);
       return;
     }
-    const word = trace.map((c) => c.letter).join("");
+    const word = trace
+      .map((c) => c.letter)
+      .join("")
+      .toLowerCase();
     if (word.length > 2) {
       if (trie.hasWord(word) && !foundWords.includes(word)) {
         const newWords = [...foundWords, word];
         setFoundWords(newWords);
         onWordsChange(newWords);
-        setScore((s) => s + calculateWordScore(word.length));
+        const newScore = calculateWordScore(word.length);
+        setScore((s) => s + newScore);
         playValidWord();
       } else {
         playInvalidWord();

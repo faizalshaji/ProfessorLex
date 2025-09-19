@@ -117,7 +117,15 @@ function Multiplayer() {
             roomId={roomName}
             playerId={playerId}
             onUpdateScore={(words) => {
-              updatePlayerScore(roomName, playerId, words.length * 10, words);
+              const score = words.reduce((total, word) => {
+                const wordLength = word.length;
+                const baseScore = wordLength * 10;
+                const extraLetters = Math.max(0, wordLength - 3);
+                const bonus =
+                  extraLetters > 0 ? Math.pow(1.5, extraLetters - 1) * 20 : 0;
+                return total + Math.floor(baseScore + bonus);
+              }, 0);
+              updatePlayerScore(roomName, playerId, score, words);
             }}
           />
         </div>

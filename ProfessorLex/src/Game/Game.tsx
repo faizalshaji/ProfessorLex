@@ -18,8 +18,6 @@ export default function Game({
   gridSize,
   time,
   gameStarted = mode === GameMode.SinglePlayer,
-  roomId,
-  playerId,
   onUpdateScore,
 }: GameProps) {
   const [foundWords, setFoundWords] = useState<string[]>([]);
@@ -49,18 +47,6 @@ export default function Game({
 
   return (
     <div className="flex h-full">
-      {/* Left Section - Timer or Stats (Only in Multiplayer) */}
-      {mode === GameMode.MultiPlayer && (
-        <div className="w-64 flex items-center justify-center p-4 bg-gray-800 flex-none">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold mb-2 text-gray-200">
-              Game Stats
-            </h3>
-            <div className="text-gray-400">Score: {foundWords.length * 10}</div>
-          </div>
-        </div>
-      )}
-
       {/* Center Section - Game Board */}
       <div className="flex-1 flex items-center justify-center p-4 bg-gray-900">
         <Board

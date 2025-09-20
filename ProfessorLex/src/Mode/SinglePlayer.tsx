@@ -8,9 +8,7 @@ function SinglePlayer() {
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
-      <div className="flex-1 w-full">
-        <Game mode={GameMode.SinglePlayer} gridSize={gridSize} time={time} />
-      </div>
+      <Game mode={GameMode.SinglePlayer} gridSize={gridSize} time={time} />
     </div>
   );
 }

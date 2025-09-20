@@ -15,25 +15,25 @@ export default function FoundWords({ words }: FoundWordsProps) {
   }, [words]);
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="mb-2">
-        <span className="text-emerald-400 text-sm font-medium">
-          Found Words ({words.length})
-        </span>
-      </div>
+    <div className="flex flex-col gap-2">
       <ul
         ref={listRef}
-        className="flex-1 overflow-y-auto space-y-1 pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
+        className="flex flex-col gap-2 pr-2 scrollbar-thin scrollbar-thumb-[#2F6F5F] scrollbar-track-transparent"
       >
         {words.map((w) => (
           <li
             key={w}
-            className="text-sm py-1 px-2 rounded bg-gray-700/50 text-emerald-400 font-medium"
+            className="text-sm py-2 px-3 rounded-lg bg-[#2F6F5F]/20 text-[#3A8A75] font-medium border border-[#2F6F5F]/20 hover:bg-[#2F6F5F]/30 transition-colors duration-200"
           >
             {w.toUpperCase()}
           </li>
         ))}
       </ul>
+      {words.length === 0 && (
+        <div className="text-center py-4 text-[#2F6F5F]/60">
+          No words found yet. Start finding words!
+        </div>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   remove,
   update,
 } from "firebase/database";
+import { GameState } from "../Enums/GameState";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCihVdfxSATzTX6Lg9bYgk2g4m0xXr2Iok",
@@ -36,7 +37,7 @@ export type Room = {
   name: string;
   players: { [key: string]: RoomPlayer };
   grid: any;
-  gameState: "waiting" | "playing" | "finished";
+  gameState: GameState;
   startTime?: number;
   gameDuration: number;
 };
@@ -60,7 +61,7 @@ export const createRoom = async (roomName: string, hostName: string) => {
         },
       },
       grid: null,
-      gameState: "waiting",
+      gameState: GameState.Waiting,
       gameDuration: 60,
     };
 
@@ -146,7 +147,7 @@ export const startGame = async (roomId: string, grid: any) => {
 
   // Update the room with the new state
   await update(ref(db, `rooms/${roomId}`), {
-    gameState: "playing",
+    gameState: GameState.Playing,
     grid,
     startTime: Date.now(),
     players: updatedPlayers,
@@ -155,7 +156,7 @@ export const startGame = async (roomId: string, grid: any) => {
 
 export const endGame = async (roomId: string) => {
   await update(ref(db, `rooms/${roomId}`), {
-    gameState: "finished",
+    gameState: GameState.Finished,
   });
 };
 

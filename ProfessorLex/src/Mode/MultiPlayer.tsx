@@ -5,6 +5,7 @@ import Game from "../Game/Game";
 import type { Room, RoomPlayer } from "../Utils/firebase";
 import { startGame, updatePlayerScore } from "../Utils/firebase";
 import { GameMode } from "../Enums/GameMode";
+import { GameState } from "../Enums/GameState";
 
 function Multiplayer() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ function Multiplayer() {
       const data = snapshot.val() as Room;
       if (data) {
         setRoom(data);
-        setGameStarted(data.gameState === "playing");
+        setGameStarted(data.gameState === GameState.Playing);
       } else {
         navigate("/");
       }

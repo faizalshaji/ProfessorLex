@@ -74,33 +74,6 @@ function Multiplayer() {
 
       {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Players List */}
-        <div className="w-64 bg-gray-800 text-white p-4 overflow-y-auto">
-          <h3 className="text-lg font-semibold mb-3">Players</h3>
-          <div className="space-y-2">
-            {Object.values(room.players || {}).map((player: RoomPlayer) => (
-              <div
-                key={player.id}
-                className={`p-2 rounded ${
-                  player.isHost ? "bg-purple-900/50" : "bg-gray-700/50"
-                }`}
-              >
-                <div className="flex justify-between items-center">
-                  <span>
-                    {player.name} {player.isHost && "👑"}
-                  </span>
-                  <span>{player.score || 0}</span>
-                </div>
-                {gameStarted && (
-                  <div className="text-xs text-gray-400 mt-1">
-                    Found: {(player.foundWords || []).length} words
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Game Board */}
         <div className="flex-1">
           <Game

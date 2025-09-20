@@ -104,7 +104,7 @@ export default function Game({
           <div className="w-64 bg-[#0A2F2F]/90 backdrop-blur-md border-r border-[#2F6F5F]/30 overflow-hidden flex flex-col">
             <div className="p-4 border-b border-[#2F6F5F]/30">
               <h3 className="text-lg font-semibold text-white">
-                {mode === GameMode.MultiPlayer ? "Players" : "Game Stats"}
+                {mode === GameMode.MultiPlayer ? "Players" : ""}
               </h3>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
@@ -145,43 +145,7 @@ export default function Game({
                     </button>
                   )}
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="p-3 rounded-lg border border-[#2F6F5F]/30 bg-[#2F6F5F]/20">
-                    <div className="text-sm text-[#3A8A75] mb-1">
-                      Words Found
-                    </div>
-                    <div className="text-2xl text-white font-semibold">
-                      {foundWords.length}
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-lg border border-[#2F6F5F]/30 bg-[#2F6F5F]/20">
-                    <div className="text-sm text-[#3A8A75] mb-1">
-                      Total Score
-                    </div>
-                    <div className="text-2xl text-white font-semibold">
-                      {foundWords.length * 30}
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-lg border border-[#2F6F5F]/30 bg-[#2F6F5F]/20">
-                    <div className="text-sm text-[#3A8A75] mb-1">
-                      Average Length
-                    </div>
-                    <div className="text-2xl text-white font-semibold">
-                      {foundWords.length > 0
-                        ? Math.round(
-                            (foundWords.reduce(
-                              (acc, word) => acc + word.length,
-                              0
-                            ) /
-                              foundWords.length) *
-                              10
-                          ) / 10
-                        : 0}
-                    </div>
-                  </div>
-                </div>
-              )}
+              ) : null}
             </div>
           </div>
 

@@ -28,8 +28,8 @@ export default function MultiplayerConfig(props: Props) {
     if (multiMode === MultiMode.Create) {
       if (!playerName.trim()) {
         setCreateError("Please enter your name");
-      } else if (gridSize < 5 || gridSize > 10) {
-        setCreateError("Grid size must be between 5 and 10");
+      } else if (gridSize < 5 || gridSize > 8) {
+        setCreateError("Grid size must be between 5 and 8");
       } else if (time < 30 || time > 300) {
         setCreateError("Time must be between 30 and 300 seconds");
       } else {

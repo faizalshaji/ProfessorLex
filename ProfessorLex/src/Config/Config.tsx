@@ -12,8 +12,8 @@ const Config = ({ gridSize, time, setGridSize, setTime }: Props) => {
   const [timeError, setTimeError] = useState("");
 
   useEffect(() => {
-    if (gridSize < 5 || gridSize > 10) {
-      setGridSizeError("Grid size must be between 5 and 10");
+    if (gridSize < 5 || gridSize > 8) {
+      setGridSizeError("Grid size must be between 5 and 8");
     } else {
       setGridSizeError("");
     }
@@ -52,9 +52,7 @@ const Config = ({ gridSize, time, setGridSize, setTime }: Props) => {
         {gridSizeError ? (
           <span className="text-red-500 text-sm">{gridSizeError}</span>
         ) : (
-          <span className="text-gray-400 text-sm">
-            Must be between 5 and 10
-          </span>
+          <span className="text-gray-400 text-sm">Must be between 5 and 8</span>
         )}
       </div>
 

@@ -19,11 +19,23 @@ function Home() {
       <img
         src="/ProfessorLex/images/home.png"
         alt="Professor Background"
-        className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none"
+        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
       />
 
+      {/* Title */}
+      <div className="relative z-10 text-center mt-[20vh] space-y-4">
+        <h1 className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 animate-fade-in">
+          Professor Lex
+        </h1>
+        <div className="flex flex-col items-center space-y-2 animate-fade-in-delay">
+          <p className="text-2xl font-light text-purple-200/80">
+            Sharpen your vocabulary, one word at a time
+          </p>
+        </div>
+      </div>
+
       {/* Mode Buttons Panel */}
-      <div className="relative z-10 w-full max-w-md mt-[60vh]">
+      <div className="relative z-10 w-full max-w-md mt-8">
         <div className="bg-black/40 backdrop-blur-md rounded-3xl p-6 border border-purple-500/20 shadow-2xl">
           <h2 className="text-2xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
             Choose Your Mode
@@ -76,8 +88,8 @@ function Home() {
             </button>
           </div>
 
-          <p className="mt-6 text-sm text-center text-gray-400">
-            Sharpen your vocabulary, one word at a time
+          <p className="mt-6 text-sm text-center text-purple-300/60">
+            Challenge yourself or compete with friends
           </p>
         </div>
       </div>

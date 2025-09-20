@@ -47,8 +47,7 @@ function Multiplayer() {
       <div className="bg-gray-800 text-white p-4 flex-none">
         <div className="container mx-auto flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-bold">Room: {room.name}</h2>
-            <p className="text-sm text-gray-400">ID: {room.id}</p>
+            <h2 className="text-xl font-bold">Room: {room.id}</h2>
           </div>
           {isHost && !gameStarted && (
             <button

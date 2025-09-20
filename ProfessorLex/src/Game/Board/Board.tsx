@@ -240,31 +240,43 @@ function Board({
     return Math.floor(Math.pow(size - 1, 2) * 1.5);
   }
 
+  function calculateMaxWordLength(size: number): number {
+    // Example formula: grid size * 1.5, capped at 12
+    return Math.min(Math.floor(size * 1.5), 12);
+  }
+
+  function hasEnoughLongWords(words: string[], maxLength: number): boolean {
+    const minLongLength = Math.floor(maxLength * 0.8); // 80% of max length
+    const longWords = words.filter((w) => w.length >= minLongLength);
+    return longWords.length >= Math.max(3, Math.floor(maxLength / 2));
+    // At least 3 or half of maxLength words must be long
+  }
+
   function initGrid() {
-    // If trie is not loaded, generate a simple grid without word validation
     if (!trie) {
-      const simpleGrid = generateGrid();
-      setGrid(simpleGrid);
+      setGrid(generateGrid());
       return;
     }
 
     let attempts = 0;
-    const maxAttempts = 100; // Increased max attempts to ensure we meet minimum
+    const maxAttempts = 100;
     const minRequiredWords = calculateMinWords(GRID_SIZE);
+    const maxWordLength = calculateMaxWordLength(GRID_SIZE);
 
     let bestGrid = generateGrid();
-    let bestWordCount = findAllWords(bestGrid).length;
+    let bestWordCount = 0;
 
     while (attempts < maxAttempts) {
       const newGrid = generateGrid();
-      const wordCount = findAllWords(newGrid).length;
+      const words = findAllWords(newGrid);
+      const wordCount = words.length;
 
-      if (wordCount >= minRequiredWords) {
-        // We found a grid that meets our minimum requirement - use it immediately
+      if (
+        wordCount >= minRequiredWords &&
+        hasEnoughLongWords(words, maxWordLength)
+      ) {
         console.log(
-          `Grid generated with ${wordCount} findable words (minimum: ${minRequiredWords}) after ${
-            attempts + 1
-          } attempts`
+          `Grid generated with ${wordCount} words, enough long words near ${maxWordLength}`
         );
         setGrid(newGrid);
         return;
@@ -274,12 +286,11 @@ function Board({
         bestGrid = newGrid;
         bestWordCount = wordCount;
       }
+
       attempts++;
     }
 
-    console.log(
-      `Grid generated with ${bestWordCount} findable words after ${attempts} attempts`
-    );
+    console.log(`Fallback grid with ${bestWordCount} words`);
     setGrid(bestGrid);
   }
 

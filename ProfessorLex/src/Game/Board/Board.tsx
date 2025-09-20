@@ -481,7 +481,7 @@ function Board({
 
   return (
     <div
-      className="relative min-h-screen bg-gradient-to-br from-slate-900 to-gray-800 text-white p-6 text-center select-none"
+      className="relative bg-gradient-to-br from-slate-900 to-gray-800 text-white p-6 text-center select-none"
       onMouseUp={onMouseUp}
     >
       <h1 className="text-4xl font-extrabold mb-6 tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">

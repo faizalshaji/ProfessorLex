@@ -77,7 +77,7 @@ function Home() {
           </div>
 
           <p className="mt-6 text-sm text-center text-gray-400">
-            Challenge yourself or compete with friends!
+            Sharpen your vocabulary, one word at a time
           </p>
         </div>
       </div>

@@ -6,6 +6,7 @@ import {
   onValue,
   remove,
   update,
+  DataSnapshot,
 } from "firebase/database";
 import { GameState } from "../Enums/GameState";
 
@@ -80,7 +81,7 @@ export const createRoom = async (roomName: string, hostName: string) => {
 export const joinRoom = async (roomId: string, playerName: string) => {
   // First check if the room exists
   const roomRef = ref(db, `rooms/${roomId}`);
-  const snapshot = await new Promise((resolve) => {
+  const snapshot = await new Promise<DataSnapshot>((resolve) => {
     onValue(roomRef, resolve, { onlyOnce: true });
   });
 
@@ -125,7 +126,7 @@ export const startGame = async (roomId: string, grid: any) => {
   const roomRef = ref(db, `rooms/${roomId}`);
 
   // First get the current room state
-  const snapshot = await new Promise((resolve) => {
+  const snapshot = await new Promise<DataSnapshot>((resolve) => {
     onValue(roomRef, resolve, { onlyOnce: true });
   });
 

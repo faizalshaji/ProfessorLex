@@ -11,7 +11,6 @@ import {
 
 type CellType = { letter: string; row: number; col: number };
 
-const GRID_SIZE = 10;
 const CELL_SIZE = 48;
 
 interface BoardProps {

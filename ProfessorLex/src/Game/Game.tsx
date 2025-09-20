@@ -78,25 +78,7 @@ export default function Game({
       {/* Game Container */}
       <div className="relative z-10 flex flex-col w-full h-full bg-gradient-to-b from-[#0A2F2F]/80 via-transparent to-[#0A2F2F]/80">
         {/* Top Panel */}
-        <div className="bg-[#0A2F2F]/90 backdrop-blur-md border-b border-[#2F6F5F]/30 p-4 flex-none">
-          <div className="w-full flex justify-between items-center px-4">
-            <div className="text-2xl font-bold bg-gradient-to-r from-fuchsia-500 to-pink-500 text-transparent bg-clip-text">
-              Professor Lex
-            </div>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <span className="text-[#2F6F5F]">⏱️</span>
-                <span className="text-white font-semibold">Time:</span>
-                <span className="text-[#3A8A75]">{time}s</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[#2F6F5F]">⭐</span>
-                <span className="text-white font-semibold">Score:</span>
-                <span className="text-[#3A8A75]">{foundWords.length * 30}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div className="bg-[#0A2F2F]/90 backdrop-blur-md border-b border-[#2F6F5F]/30 p-4 flex-none"></div>
 
         {/* Main Content */}
         <div className="flex flex-1 min-h-0">

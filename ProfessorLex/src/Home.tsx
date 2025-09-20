@@ -14,30 +14,30 @@ function Home() {
   const [error, setError] = useState("");
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-start px-4 text-white overflow-hidden">
+    <div className="relative min-h-screen w-full bg-gradient-to-b from-[#0A2F2F]/80 via-transparent to-[#0A2F2F]/80 flex flex-col items-center justify-start px-4 text-white overflow-hidden">
       {/* Background Image */}
       <img
-        src="/ProfessorLex/images/home.png"
+        src="/ProfessorLex/images/home.jpg"
         alt="Professor Background"
-        className="absolute inset-0 w-full h-full object-cover opacity-25 pointer-events-none"
+        className="absolute inset-0 w-full h-full object-cover opacity-100 pointer-events-none"
       />
 
       {/* Title */}
-      <div className="relative z-10 text-center mt-[20vh] space-y-4">
-        <h1 className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 animate-fade-in">
+      <div className="relative z-10 text-center mt-[15vh] space-y-6">
+        <h1 className="text-8xl font-bold text-white animate-fade-in drop-shadow-[0_4px_30px_rgba(0,0,0,0.7)]">
           Professor Lex
         </h1>
         <div className="flex flex-col items-center space-y-2 animate-fade-in-delay">
-          <p className="text-2xl font-light text-purple-200/80">
+          <p className="text-3xl font-light tracking-wide text-white/95 drop-shadow-[0_4px_15px_rgba(0,0,0,0.6)]">
             Sharpen your vocabulary, one word at a time
           </p>
         </div>
       </div>
 
       {/* Mode Buttons Panel */}
-      <div className="relative z-10 w-full max-w-md mt-8">
-        <div className="bg-black/40 backdrop-blur-md rounded-3xl p-6 border border-purple-500/20 shadow-2xl">
-          <h2 className="text-2xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+      <div className="relative z-10 w-full max-w-md mt-16">
+        <div className="bg-[#0A2F2F]/60 backdrop-blur-sm rounded-3xl p-8 border border-white/5 shadow-2xl">
+          <h2 className="text-2xl font-bold text-center mb-10 text-white/90 tracking-wide">
             Choose Your Mode
           </h2>
           <div className="space-y-4">
@@ -46,7 +46,7 @@ function Home() {
                 setMode("single");
                 setShowPopup(true);
               }}
-              className="w-full flex items-center gap-3 justify-center py-4 px-6 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 rounded-xl shadow-lg hover:shadow-purple-500/25 text-lg font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full flex items-center gap-3 justify-center py-5 px-6 bg-[#1A472F]/80 hover:bg-[#1A472F] backdrop-blur-sm rounded-xl shadow-lg hover:shadow-emerald-900/30 text-lg font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
             >
               <svg
                 className="w-6 h-6"
@@ -69,7 +69,7 @@ function Home() {
                 setMode("multi");
                 setShowPopup(true);
               }}
-              className="w-full flex items-center gap-3 justify-center py-4 px-6 bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 rounded-xl shadow-lg hover:shadow-pink-500/25 text-lg font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full flex items-center gap-3 justify-center py-5 px-6 bg-[#0A2F2F]/90 hover:bg-[#0A2F2F] backdrop-blur-sm rounded-xl shadow-lg hover:shadow-emerald-900/30 text-lg font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
             >
               <svg
                 className="w-6 h-6"
@@ -88,7 +88,7 @@ function Home() {
             </button>
           </div>
 
-          <p className="mt-6 text-sm text-center text-purple-300/60">
+          <p className="mt-8 text-sm text-center text-white/80 tracking-wide">
             Challenge yourself or compete with friends
           </p>
         </div>

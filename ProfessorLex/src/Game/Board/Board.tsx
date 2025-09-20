@@ -40,6 +40,7 @@ function Board({
   const gameOverSoundPlayed = useRef(false);
   const gameStarted = useRef(false);
   const initialLoadComplete = useRef(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Initial load only happens once
@@ -98,6 +99,11 @@ function Board({
       .map((w) => w.trim())
       .filter(Boolean);
     return words;
+  }
+
+  function finishLoading() {
+    // Wait 500ms before hiding loading text for smoother experience
+    setTimeout(() => setLoading(false), 500);
   }
 
   const restartGame = async () => {
@@ -253,8 +259,11 @@ function Board({
   }
 
   function initGrid() {
+    setLoading(true); // Start loading
+
     if (!trie) {
       setGrid(generateGrid());
+      finishLoading();
       return;
     }
 
@@ -279,6 +288,7 @@ function Board({
           `Grid generated with ${wordCount} words, enough long words near ${maxWordLength}`
         );
         setGrid(newGrid);
+        finishLoading(); // <-- Stop loading once we find a valid grid
         return;
       }
 
@@ -292,6 +302,7 @@ function Board({
 
     console.log(`Fallback grid with ${bestWordCount} words`);
     setGrid(bestGrid);
+    finishLoading();
   }
 
   function isAdjacent(a: CellType, b: CellType) {
@@ -509,6 +520,14 @@ function Board({
             </div>
           </div>
         )}
+        {loading && (
+          <div className="absolute inset-0 z-30 bg-black/70 backdrop-blur-sm flex items-center justify-center">
+            <h2 className="text-3xl font-bold text-white animate-pulse">
+              Generating Board...
+            </h2>
+          </div>
+        )}
+
         {/* Canvas over the grid */}
         <canvas
           ref={canvasRef}

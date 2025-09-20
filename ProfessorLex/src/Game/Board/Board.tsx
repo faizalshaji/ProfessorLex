@@ -555,7 +555,7 @@ function Board({
           <GameOver score={score} />{" "}
           <button
             onClick={restartGame}
-            className="mt-6 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
+            className="w-full py-3 mt-6 bg-[#2F6F5F] hover:bg-[#3A8A75] backdrop-blur-sm text-white font-semibold rounded-xl shadow-lg shadow-[#1A472F]/20 hover:shadow-[#2F6F5F]/40 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Play Again
           </button>

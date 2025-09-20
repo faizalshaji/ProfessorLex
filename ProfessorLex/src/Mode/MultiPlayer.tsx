@@ -55,7 +55,7 @@ function Multiplayer() {
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center p-4 bg-gray-900 text-white">
+      <div className="flex justify-between items-center p-4  bg-[#0A2F2F]/90 backdrop-blur-md text-white">
         <h2 className="text-xl font-bold">Room: {room.id}</h2>
         {isHost && !gameStarted && (
           <button

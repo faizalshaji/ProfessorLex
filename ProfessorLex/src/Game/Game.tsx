@@ -41,14 +41,11 @@ export default function Game({
   if (!gameStarted) {
     return (
       <div className="relative flex h-full w-full items-center justify-center">
-        {/* Background Image */}
         <img
           src="/ProfessorLex/images/home.jpg"
           alt="Game Background"
           className="absolute inset-0 w-full h-full object-cover opacity-100 pointer-events-none"
         />
-
-        {/* Content */}
         <div className="relative z-10 bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] text-center">
           <div className="text-4xl mb-4">🎲</div>
           <h2 className="text-2xl font-semibold mb-3 text-white">
@@ -75,23 +72,17 @@ export default function Game({
         className="absolute inset-0 w-full h-full object-cover opacity-100 pointer-events-none"
       />
 
-      {/* Game Container */}
       <div className="relative z-10 flex flex-col w-full h-full bg-gradient-to-b from-[#0A2F2F]/80 via-transparent to-[#0A2F2F]/80">
-        {/* Top Panel */}
-        <div className="bg-[#0A2F2F]/90 backdrop-blur-md border-b border-[#2F6F5F]/30 p-4 flex-none"></div>
-
         {/* Main Content */}
         <div className="flex flex-1 min-h-0">
-          {/* Left Column - Players/Statistics */}
-          <div className="w-64 bg-[#0A2F2F]/90 backdrop-blur-md border-r border-[#2F6F5F]/30 overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-[#2F6F5F]/30">
-              <h3 className="text-lg font-semibold text-white">
-                {mode === GameMode.MultiPlayer ? "Players" : ""}
-              </h3>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              {mode === GameMode.MultiPlayer ? (
-                <div className="space-y-2">
+          {/* Left Panel Placeholder */}
+          <div className="w-64 flex-shrink-0">
+            {mode === GameMode.MultiPlayer && (
+              <div className="h-full bg-[#0A2F2F]/90 backdrop-blur-md border-r border-[#2F6F5F]/30 flex flex-col">
+                <div className="p-4 border-b border-[#2F6F5F]/30">
+                  <h3 className="text-lg font-semibold text-white">Players</h3>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4">
                   {players ? (
                     Object.values(players).map((player) => (
                       <div
@@ -127,25 +118,28 @@ export default function Game({
                     </button>
                   )}
                 </div>
-              ) : null}
-            </div>
+              </div>
+            )}
           </div>
 
-          {/* Center Column - Game Board */}
-          <div className="flex-1 overflow-hidden flex items-center justify-center">
+          {/* Center Panel */}
+          <div className="flex-1 overflow-hidden flex items-center justify-center relative">
             <div className="max-h-full p-6">
-              <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] hover:shadow-[0_0_50px_rgba(47,111,95,0.2)] transition-shadow duration-300">
+              <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] hover:shadow-[0_0_50px_rgba(47,111,95,0.2)] transition-shadow duration-300 relative">
                 <Board
                   onWordsChange={handleWordsChange}
                   gridSize={gridSize}
                   initialTime={time}
                   gameStarted={gameStarted}
                 />
+                {!gameStarted && (
+                  <div className="absolute inset-0 bg-black/30 cursor-not-allowed rounded-3xl"></div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Right Column - Found Words */}
+          {/* Right Panel */}
           <div className="w-72 bg-[#0A2F2F]/90 backdrop-blur-md border-l border-[#2F6F5F]/30 overflow-hidden flex flex-col">
             <div className="p-4 border-b border-[#2F6F5F]/30">
               <h3 className="text-xl font-semibold text-white tracking-wide flex items-center gap-2">

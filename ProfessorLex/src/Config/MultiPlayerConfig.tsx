@@ -91,22 +91,22 @@ export default function MultiplayerConfig(props: Props) {
   };
 
   const getInputClass = (hasError: boolean) =>
-    `w-full px-4 py-3 bg-gray-800 border ${
-      hasError ? "border-red-500" : "border-gray-600"
+    `w-full px-4 py-3 bg-[#2F6F5F]/40 border ${
+      hasError ? "border-red-500" : "border-[#2F6F5F]/50"
     } 
      rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 
      ${
-       hasError ? "focus:ring-red-500" : "focus:ring-purple-500"
+       hasError ? "focus:ring-red-500" : "focus:ring-[#3A8A75]"
      } transition-all duration-200 text-lg`;
 
   return (
     <div className="space-y-6">
-      <div className="flex bg-gray-800 p-1 rounded-lg">
+      <div className="flex bg-[#0A2F2F]/90 backdrop-blur-md p-1 rounded-lg border border-[#2F6F5F]/30">
         <button
           onClick={() => setMultiMode(MultiMode.Join)}
           className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
             multiMode === MultiMode.Join
-              ? "bg-purple-600 text-white shadow-lg"
+              ? "bg-[#2F6F5F] text-white shadow-lg shadow-[#1A472F]/20"
               : "text-gray-300 hover:text-white"
           }`}
         >
@@ -116,7 +116,7 @@ export default function MultiplayerConfig(props: Props) {
           onClick={() => setMultiMode(MultiMode.Create)}
           className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
             multiMode === MultiMode.Create
-              ? "bg-purple-600 text-white shadow-lg"
+              ? "bg-[#2F6F5F] text-white shadow-lg shadow-[#1A472F]/20"
               : "text-gray-300 hover:text-white"
           }`}
         >
@@ -174,12 +174,12 @@ export default function MultiplayerConfig(props: Props) {
           onClick={
             multiMode === MultiMode.Create ? handleCreateRoom : handleJoinRoom
           }
-          className={`w-full py-3 rounded-lg shadow-lg transform hover:scale-[1.02] transition-all duration-200
-            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800
+          className={`w-full py-3 rounded-xl shadow-lg shadow-[#1A472F]/20 hover:shadow-[#2F6F5F]/40 transform hover:scale-[1.02] transition-all duration-300
+            focus:outline-none focus:ring-2 focus:ring-[#3A8A75] bg-[#2F6F5F] hover:bg-[#3A8A75] backdrop-blur-sm text-white
             ${
               multiMode === MultiMode.Create
-                ? "bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white focus:ring-indigo-500"
-                : "bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white focus:ring-purple-500"
+                ? "active:scale-[0.98]"
+                : "active:scale-[0.98]"
             }`}
         >
           {multiMode === MultiMode.Create ? "Create Room" : "Join Room"}

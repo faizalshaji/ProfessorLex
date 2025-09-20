@@ -33,7 +33,7 @@ const Config = ({ gridSize, time, setGridSize, setTime }: Props) => {
   };
 
   return (
-    <div className="space-y-8 bg-gray-800 p-6 rounded-lg shadow-lg">
+    <div className="space-y-8 bg-[#0A2F2F]/90 backdrop-blur-md p-6 rounded-xl border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)]">
       <div className="flex flex-col gap-3">
         <label htmlFor="gridSize" className="text-lg font-semibold text-white">
           Grid Size
@@ -43,11 +43,11 @@ const Config = ({ gridSize, time, setGridSize, setTime }: Props) => {
           type="text"
           value={gridSize}
           onChange={(e) => setGridSize(parseNumber(e.target.value))}
-          className={`bg-gray-700 border ${
-            gridSizeError ? "border-red-500" : "border-gray-600"
+          className={`bg-[#2F6F5F]/40 border ${
+            gridSizeError ? "border-red-500" : "border-[#2F6F5F]/50"
           } text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 ${
-            gridSizeError ? "focus:ring-red-500" : "focus:ring-purple-500"
-          } text-lg`}
+            gridSizeError ? "focus:ring-red-500" : "focus:ring-[#3A8A75]"
+          } text-lg transition-all duration-200`}
         />
         {gridSizeError ? (
           <span className="text-red-500 text-sm">{gridSizeError}</span>
@@ -67,11 +67,11 @@ const Config = ({ gridSize, time, setGridSize, setTime }: Props) => {
           type="text"
           value={time}
           onChange={(e) => setTime(parseNumber(e.target.value))}
-          className={`bg-gray-700 border ${
-            timeError ? "border-red-500" : "border-gray-600"
+          className={`bg-[#2F6F5F]/40 border ${
+            timeError ? "border-red-500" : "border-[#2F6F5F]/50"
           } text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 ${
-            timeError ? "focus:ring-red-500" : "focus:ring-purple-500"
-          } text-lg`}
+            timeError ? "focus:ring-red-500" : "focus:ring-[#3A8A75]"
+          } text-lg transition-all duration-200`}
         />
         {timeError ? (
           <span className="text-red-500 text-sm">{timeError}</span>

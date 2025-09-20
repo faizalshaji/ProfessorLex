@@ -36,8 +36,8 @@ function Home() {
 
       {/* Mode Buttons Panel */}
       <div className="relative z-10 w-full max-w-md mt-16">
-        <div className="bg-[#0A2F2F]/60 backdrop-blur-sm rounded-3xl p-8 border border-white/5 shadow-2xl">
-          <h2 className="text-2xl font-bold text-center mb-10 text-white/90 tracking-wide">
+        <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] hover:shadow-[0_0_50px_rgba(47,111,95,0.2)] transition-shadow duration-300">
+          <h2 className="text-2xl font-bold text-center mb-10 text-white tracking-wide">
             Choose Your Mode
           </h2>
           <div className="space-y-4">
@@ -46,7 +46,7 @@ function Home() {
                 setMode("single");
                 setShowPopup(true);
               }}
-              className="w-full flex items-center gap-3 justify-center py-5 px-6 bg-[#1A472F]/80 hover:bg-[#1A472F] backdrop-blur-sm rounded-xl shadow-lg hover:shadow-emerald-900/30 text-lg font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full flex items-center gap-3 justify-center py-5 px-6 bg-[#2F6F5F] hover:bg-[#3A8A75] backdrop-blur-sm rounded-xl shadow-lg shadow-[#1A472F]/20 hover:shadow-[#2F6F5F]/40 text-lg font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
             >
               <svg
                 className="w-6 h-6"
@@ -69,7 +69,7 @@ function Home() {
                 setMode("multi");
                 setShowPopup(true);
               }}
-              className="w-full flex items-center gap-3 justify-center py-5 px-6 bg-[#0A2F2F]/90 hover:bg-[#0A2F2F] backdrop-blur-sm rounded-xl shadow-lg hover:shadow-emerald-900/30 text-lg font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full flex items-center gap-3 justify-center py-5 px-6 bg-[#1F574A] hover:bg-[#286D5D] backdrop-blur-sm rounded-xl shadow-lg shadow-[#1A472F]/20 hover:shadow-[#2F6F5F]/40 text-lg font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
             >
               <svg
                 className="w-6 h-6"
@@ -88,7 +88,7 @@ function Home() {
             </button>
           </div>
 
-          <p className="mt-8 text-sm text-center text-white/80 tracking-wide">
+          <p className="mt-8 text-sm text-center text-[#7FBFAB] tracking-wide">
             Challenge yourself or compete with friends
           </p>
         </div>

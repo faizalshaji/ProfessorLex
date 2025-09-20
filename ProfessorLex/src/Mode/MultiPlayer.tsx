@@ -44,9 +44,9 @@ function Multiplayer() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <div className="bg-gray-800 text-white p-4 flex-none">
-        <div className="container mx-auto flex justify-between items-center">
+    <div className="h-screen w-screen flex flex-col overflow-hidden">
+      <div className="bg-[#0A2F2F]/90 backdrop-blur-md border-b border-[#2F6F5F]/30 text-white p-4 flex-none">
+        <div className="w-full flex justify-between items-center px-4">
           <div>
             <h2 className="text-xl font-bold">Room: {room.id}</h2>
           </div>

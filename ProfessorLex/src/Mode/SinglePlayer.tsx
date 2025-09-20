@@ -7,8 +7,8 @@ function SinglePlayer() {
   const { gridSize, time } = location.state || { gridSize: 5, time: 60 };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <div className="flex-1">
+    <div className="h-screen w-screen flex flex-col overflow-hidden">
+      <div className="flex-1 w-full">
         <Game mode={GameMode.SinglePlayer} gridSize={gridSize} time={time} />
       </div>
     </div>

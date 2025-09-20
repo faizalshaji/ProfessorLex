@@ -498,27 +498,6 @@ function Board({
       </div>
 
       <div className="relative inline-block">
-        {isGameOver && (
-          <div className="absolute inset-0 z-20 bg-black/70 backdrop-blur-sm flex items-center justify-center">
-            <div className="text-center p-8">
-              <h2 className="text-4xl font-bold text-red-400 mb-6">
-                Game Over!
-              </h2>
-              <p className="text-3xl font-semibold text-white mb-4">
-                Score: {score}
-              </p>
-              <p className="text-xl text-emerald-400 mb-2">
-                Found Words: {foundWords.length}
-              </p>
-              <button
-                onClick={restartGame}
-                className="mt-6 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
-              >
-                Play Again
-              </button>
-            </div>
-          </div>
-        )}
         {loading && (
           <div className="absolute inset-0 z-30 bg-black/70 backdrop-blur-sm flex items-center justify-center">
             <h2 className="text-3xl font-bold text-white animate-pulse">
@@ -571,7 +550,17 @@ function Board({
         </div>
       </div>
 
-      {time === 0 && <GameOver score={score} />}
+      {time === 0 && (
+        <div>
+          <GameOver score={score} />{" "}
+          <button
+            onClick={restartGame}
+            className="mt-6 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
+          >
+            Play Again
+          </button>
+        </div>
+      )}
     </div>
   );
 }

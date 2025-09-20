@@ -14,18 +14,22 @@ function Home() {
   const [error, setError] = useState("");
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center px-4 text-white">
-      <h1 className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 drop-shadow-lg mb-12 text-center">
-        Professor Lex
-      </h1>
+    <div className="relative min-h-screen w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center px-4 text-white overflow-hidden">
+      {/* Background Image */}
+      <img
+        src="/ProfessorLex/images/home.png"
+        alt="Professor Background"
+        className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none"
+      />
 
-      <div className="flex flex-col gap-6 w-full max-w-sm">
+      {/* Mode Buttons */}
+      <div className="flex flex-col gap-6 w-full max-w-sm z-10">
         <button
           onClick={() => {
             setMode("single");
             setShowPopup(true);
           }}
-          className="w-full py-3 bg-blue-500 hover:bg-blue-600 transition duration-200 rounded-lg text-lg font-semibold shadow-lg transform hover:scale-105"
+          className="flex items-center gap-3 justify-center py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-2xl shadow-xl hover:shadow-2xl text-lg font-semibold transition transform hover:scale-105"
         >
           Single Player
         </button>
@@ -35,12 +39,13 @@ function Home() {
             setMode("multi");
             setShowPopup(true);
           }}
-          className="w-full py-3 bg-green-500 hover:bg-green-600 transition duration-200 rounded-lg text-lg font-semibold shadow-lg transform hover:scale-105"
+          className="flex items-center gap-3 justify-center py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-2xl shadow-xl hover:shadow-2xl text-lg font-semibold transition transform hover:scale-105"
         >
           Multiplayer
         </button>
       </div>
 
+      {/* Config Popup */}
       <Popup
         isOpen={showPopup}
         onClose={() => {

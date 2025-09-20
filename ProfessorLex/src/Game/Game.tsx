@@ -11,6 +11,12 @@ interface GameProps {
   roomId?: string;
   playerId?: string;
   onUpdateScore?: (words: string[]) => void;
+  players?: Record<
+    string,
+    { id: string; name: string; score: number; isHost: boolean }
+  >;
+  isHost?: boolean;
+  onStartGame?: () => void;
 }
 
 export default function Game({
@@ -19,6 +25,9 @@ export default function Game({
   time,
   gameStarted = mode === GameMode.SinglePlayer,
   onUpdateScore,
+  players,
+  isHost,
+  onStartGame,
 }: GameProps) {
   const [foundWords, setFoundWords] = useState<string[]>([]);
 
@@ -91,21 +100,108 @@ export default function Game({
 
         {/* Main Content */}
         <div className="flex flex-1 min-h-0">
-          {/* Center Section - Game Board */}
-          <div className="flex-1 flex items-center justify-center p-6">
-            <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] hover:shadow-[0_0_50px_rgba(47,111,95,0.2)] transition-shadow duration-300">
-              <Board
-                onWordsChange={handleWordsChange}
-                gridSize={gridSize}
-                initialTime={time}
-                gameStarted={gameStarted}
-              />
+          {/* Left Column - Players/Statistics */}
+          <div className="w-64 bg-[#0A2F2F]/90 backdrop-blur-md border-r border-[#2F6F5F]/30 overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-[#2F6F5F]/30">
+              <h3 className="text-lg font-semibold text-white">
+                {mode === GameMode.MultiPlayer ? "Players" : "Game Stats"}
+              </h3>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {mode === GameMode.MultiPlayer ? (
+                <div className="space-y-2">
+                  {players ? (
+                    Object.values(players).map((player) => (
+                      <div
+                        key={player.id}
+                        className={`p-3 rounded-lg border backdrop-blur-sm transition-all duration-200 ${
+                          player.isHost
+                            ? "bg-[#2F6F5F]/20 border-[#2F6F5F]/30 hover:bg-[#2F6F5F]/30"
+                            : "bg-[#0A2F2F]/40 border-[#2F6F5F]/20 hover:bg-[#0A2F2F]/60"
+                        }`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="flex items-center gap-2 text-white">
+                            {player.name}{" "}
+                            {player.isHost && (
+                              <span className="text-[#3A8A75]">👑</span>
+                            )}
+                          </span>
+                          <span className="text-[#3A8A75]">{player.score}</span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-[#2F6F5F] text-center mt-4">
+                      No players yet
+                    </div>
+                  )}
+                  {!gameStarted && isHost && (
+                    <button
+                      onClick={onStartGame}
+                      className="w-full mt-4 py-2 px-4 bg-[#2F6F5F] hover:bg-[#3A8A75] text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#1A472F]/20 hover:shadow-[#2F6F5F]/40"
+                    >
+                      Start Game
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="p-3 rounded-lg border border-[#2F6F5F]/30 bg-[#2F6F5F]/20">
+                    <div className="text-sm text-[#3A8A75] mb-1">
+                      Words Found
+                    </div>
+                    <div className="text-2xl text-white font-semibold">
+                      {foundWords.length}
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-lg border border-[#2F6F5F]/30 bg-[#2F6F5F]/20">
+                    <div className="text-sm text-[#3A8A75] mb-1">
+                      Total Score
+                    </div>
+                    <div className="text-2xl text-white font-semibold">
+                      {foundWords.length * 30}
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-lg border border-[#2F6F5F]/30 bg-[#2F6F5F]/20">
+                    <div className="text-sm text-[#3A8A75] mb-1">
+                      Average Length
+                    </div>
+                    <div className="text-2xl text-white font-semibold">
+                      {foundWords.length > 0
+                        ? Math.round(
+                            (foundWords.reduce(
+                              (acc, word) => acc + word.length,
+                              0
+                            ) /
+                              foundWords.length) *
+                              10
+                          ) / 10
+                        : 0}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right Section - Found Words */}
-          <div className="w-80 bg-[#0A2F2F]/90 backdrop-blur-md border-l border-[#2F6F5F]/30 overflow-hidden flex flex-col">
-            <div className="p-6 border-b border-[#2F6F5F]/30">
+          {/* Center Column - Game Board */}
+          <div className="flex-1 overflow-hidden flex items-center justify-center">
+            <div className="max-h-full p-6">
+              <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] hover:shadow-[0_0_50px_rgba(47,111,95,0.2)] transition-shadow duration-300">
+                <Board
+                  onWordsChange={handleWordsChange}
+                  gridSize={gridSize}
+                  initialTime={time}
+                  gameStarted={gameStarted}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Found Words */}
+          <div className="w-72 bg-[#0A2F2F]/90 backdrop-blur-md border-l border-[#2F6F5F]/30 overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-[#2F6F5F]/30">
               <h3 className="text-xl font-semibold text-white tracking-wide flex items-center gap-2">
                 <span>Found Words</span>
                 <span className="text-sm text-[#3A8A75]">
@@ -113,11 +209,32 @@ export default function Game({
                 </span>
               </h3>
             </div>
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4">
               <FoundWords words={foundWords} />
             </div>
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="bg-[#0A2F2F] border-t border-[#2F6F5F]/30 py-2 px-4 flex-none">
+          <div className="w-full flex justify-center items-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-[#2F6F5F]">🎲</span>
+              <span className="text-white">
+                Grid Size: {gridSize}x{gridSize}
+              </span>
+            </div>
+            <div className="text-[#2F6F5F]">•</div>
+            <div className="flex items-center gap-2">
+              <span className="text-[#2F6F5F]">🎮</span>
+              <span className="text-white">
+                {mode === GameMode.SinglePlayer
+                  ? "Single Player"
+                  : "Multiplayer"}
+              </span>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

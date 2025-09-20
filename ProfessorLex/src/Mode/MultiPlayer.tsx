@@ -38,50 +38,43 @@ function Multiplayer() {
   }, [roomName, navigate, playerId, playerName]);
 
   if (!room) return <div>Loading...</div>;
+  if (!roomName || !playerId) return <div>Invalid game session</div>;
 
-  if (!roomName || !playerId) {
-    return <div>Invalid game session</div>;
-  }
+  const handleStartGame = async () => {
+    if (!roomName || !gridSize) return;
+    const grid = Array(gridSize)
+      .fill(null)
+      .map(() =>
+        Array(gridSize)
+          .fill(null)
+          .map(() => String.fromCharCode(65 + Math.floor(Math.random() * 26)))
+      );
+    await startGame(roomName, grid);
+  };
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
-      <div className="bg-[#0A2F2F]/90 backdrop-blur-md border-b border-[#2F6F5F]/30 text-white p-4 flex-none">
-        <div className="w-full flex justify-between items-center px-4">
-          <div>
-            <h2 className="text-xl font-bold">Room: {room.id}</h2>
+      {/* Header */}
+      <div className="flex justify-between items-center p-4 bg-gray-900 text-white">
+        <h2 className="text-xl font-bold">Room: {room.id}</h2>
+        {isHost && !gameStarted && (
+          <button
+            onClick={handleStartGame}
+            className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded transition-colors"
+          >
+            Start Game
+          </button>
+        )}
+        {!isHost && !gameStarted && (
+          <div className="text-sm text-gray-400">
+            Waiting for host to start...
           </div>
-          {isHost && !gameStarted && (
-            <button
-              onClick={async () => {
-                if (room) {
-                  const grid = Array(gridSize)
-                    .fill(null)
-                    .map(() =>
-                      Array(gridSize)
-                        .fill(null)
-                        .map(() =>
-                          String.fromCharCode(
-                            65 + Math.floor(Math.random() * 26)
-                          )
-                        )
-                    );
-                  await startGame(roomName, grid);
-                }
-              }}
-              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded transition-colors"
-            >
-              Start Game
-            </button>
-          )}
-          {!isHost && !gameStarted && (
-            <div className="text-sm text-gray-400">
-              Waiting for host to start the game...
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      {/* Main Layout */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Players List */}
         <div className="w-64 bg-gray-800 text-white p-4 overflow-y-auto">
           <h3 className="text-lg font-semibold mb-3">Players</h3>
           <div className="space-y-2">
@@ -108,6 +101,7 @@ function Multiplayer() {
           </div>
         </div>
 
+        {/* Game Board */}
         <div className="flex-1">
           <Game
             mode={GameMode.MultiPlayer}
@@ -116,6 +110,9 @@ function Multiplayer() {
             gameStarted={gameStarted}
             roomId={roomName}
             playerId={playerId}
+            isHost={isHost}
+            players={room.players}
+            onStartGame={handleStartGame}
             onUpdateScore={(words) => {
               const score = words.reduce((total, word) => {
                 const wordLength = word.length;

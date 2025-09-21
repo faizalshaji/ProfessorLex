@@ -19,7 +19,7 @@ function SinglePlayer() {
         >
           <HomeIcon className="w-5 h-5" />
         </button>
-        <div className="text-sm text-gray-300">Single Player</div>
+        {/* Header text removed as requested */}
       </div>
       <Game mode={GameMode.SinglePlayer} gridSize={gridSize} time={time} />
     </div>

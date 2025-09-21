@@ -64,7 +64,7 @@ export default function Game({
             {mode === GameMode.MultiPlayer && (
               <div className="h-full bg-[#0A2F2F]/90 backdrop-blur-md border-r border-[#2F6F5F]/30 flex flex-col">
                 <div className="p-4 border-b border-[#2F6F5F]/30">
-                  <h3 className="text-lg font-semibold text-white">Players</h3>
+                  <h3 className="text-lg font-semibold text-white">Students</h3>
                 </div>
                 <div className="flex-1 overflow-y-auto p-4">
                   {players ? (

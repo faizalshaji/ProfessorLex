@@ -213,23 +213,25 @@ function Multiplayer() {
             <div />
           )}
         </div>
-        {/* Right: Player name + settings */}
+        {/* Right: Player name + settings (only after join) */}
         <div className="flex justify-end">
-          <button
-            className="flex items-center gap-2 px-3 py-1 rounded bg-[#2F6F5F] hover:bg-[#3A8A75] text-white text-sm"
-            onClick={() => setNeedsName(true)}
-            title="Edit your name"
-          >
-            <span>{displayName || session?.playerName || ""}</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className="w-4 h-4"
+          {activeId && (
+            <button
+              className="flex items-center gap-2 px-3 py-1 rounded bg-[#2F6F5F] hover:bg-[#3A8A75] text-white text-sm"
+              onClick={() => setNeedsName(true)}
+              title="Edit your name"
             >
-              <path d="M11.49 3.17c-.38-1.15-2-.86-2 .36v.91a6.96 6.96 0 00-2.03.84l-.64-.64c-.9-.9-2.36.56-1.46 1.46l.64.64c-.35.63-.62 1.32-.79 2.04h-.91c-1.22 0-1.51 1.62-.36 2l.91.3c.06.71.25 1.4.54 2.03l-.64.64c-.9.9.56 2.36 1.46 1.46l.64-.64c.64.3 1.32.49 2.03.55l.3.91c.38 1.15 2 .86 2-.36v-.91c.71-.06 1.4-.25 2.03-.54l.64.64c.9.9 2.36-.56 1.46-1.46l-.64-.64c.3-.64.49-1.32.55-2.03l.91-.3c1.15-.38.86-2-.36-2h-.91a6.96 6.96 0 00-.84-2.03l.64-.64c.9-.9-.56-2.36-1.46-1.46l-.64.64a6.96 6.96 0 00-2.03-.84v-.91zM10 13a3 3 0 110-6 3 3 0 010 6z" />
-            </svg>
-          </button>
+              <span>{displayName || session?.playerName || ""}</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="w-4 h-4"
+              >
+                <path d="M11.49 3.17c-.38-1.15-2-.86-2 .36v.91a6.96 6.96 0 00-2.03.84l-.64-.64c-.9-.9-2.36.56-1.46 1.46l.64.64c-.35.63-.62 1.32-.79 2.04h-.91c-1.22 0-1.51 1.62-.36 2l.91.3c.06.71.25 1.4.54 2.03l-.64.64c-.9.9.56 2.36 1.46 1.46l.64-.64c.64.3 1.32.49 2.03.55l.3.91c.38 1.15 2 .86 2-.36v-.91c.71-.06 1.4-.25 2.03-.54l.64.64c.9.9 2.36-.56 1.46-1.46l-.64-.64c.3-.64.49-1.32.55-2.03l.91-.3c1.15-.38.86-2-.36-2h-.91a6.96 6.96 0 00-.84-2.03l.64-.64c.9-.9-.56-2.36-1.46-1.46l-.64.64a6.96 6.96 0 00-2.03-.84v-.91zM10 13a3 3 0 110-6 3 3 0 010 6z" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 

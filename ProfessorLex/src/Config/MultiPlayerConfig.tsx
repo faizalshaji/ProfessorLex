@@ -149,7 +149,7 @@ export default function MultiplayerConfig(props: Props) {
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
             className={getInputClass(
-              (multiMode === MultiMode.Join && !!joinError) ||
+              (multiMode === MultiMode.Join && !!joinError && !playerName) ||
                 (multiMode === MultiMode.Create && !!createError && !playerName)
             )}
           />

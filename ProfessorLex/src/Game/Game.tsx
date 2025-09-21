@@ -166,36 +166,37 @@ export default function Game({
 
           {/* Right Panel */}
           <div className="w-72 bg-[#0A2F2F]/90 backdrop-blur-md border-l border-[#2F6F5F]/30 overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-[#2F6F5F]/30">
-              <h3 className="text-xl font-semibold text-white tracking-wide flex items-center gap-2">
-                <span>Found Words</span>
-                <span className="text-sm text-[#3A8A75]">
-                  ({foundWords.length})
-                </span>
-              </h3>
+            {/* Found Words Section */}
+            <div className="flex-1 min-h-0 flex flex-col">
+              <div className="p-4 border-b border-[#2F6F5F]/30">
+                <h3 className="text-xl font-semibold text-white tracking-wide flex items-center gap-2">
+                  <span>Found Words</span>
+                  <span className="text-sm text-[#3A8A75]">({foundWords.length})</span>
+                </h3>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                <FoundWords words={foundWords} />
+              </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
-              <FoundWords words={foundWords} />
 
-              {/* Missed Words panel */}
-              {missedWords.length > 0 && (
-                <div>
-                  <div className="mb-2 flex items-center justify-between">
-                    <h4 className="text-lg font-semibold text-white">
-                      Missed Words
-                    </h4>
-                    <span className="text-sm text-[#3A8A75]">
-                      ({missedWords.length})
-                    </span>
-                  </div>
+            {/* Divider */}
+            <div className="h-px bg-[#2F6F5F]/30" />
+
+            {/* Missed Words Section */}
+            <div className="flex-1 min-h-0 flex flex-col">
+              <div className="p-4 border-b border-[#2F6F5F]/30">
+                <h3 className="text-xl font-semibold text-white tracking-wide flex items-center justify-between">
+                  <span>Missed Words</span>
+                  <span className="text-sm text-[#3A8A75]">({missedWords.length})</span>
+                </h3>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                {missedWords.length > 0 ? (
                   <div className="grid grid-cols-1 gap-1">
                     {missedWords.map((w, idx) => (
                       <button
                         key={w + idx}
-                        onClick={() =>
-                          highlightMissedRef.current &&
-                          highlightMissedRef.current(w)
-                        }
+                        onClick={() => highlightMissedRef.current && highlightMissedRef.current(w)}
                         className="w-full text-left px-2 py-1 rounded hover:bg-[#2F6F5F]/30 text-[#BFE2D5]"
                         title="Click to highlight on board"
                       >
@@ -203,8 +204,10 @@ export default function Game({
                       </button>
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="text-[#2F6F5F] text-sm">No missed words yet</div>
+                )}
+              </div>
             </div>
           </div>
         </div>

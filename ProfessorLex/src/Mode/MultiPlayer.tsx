@@ -1,9 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { getDatabase, ref, onValue } from "firebase/database";
 import Game from "../Game/Game";
 import type { Room } from "../Utils/firebase";
-import { startGame, updatePlayerScore } from "../Utils/firebase";
+import {
+  startGame,
+  updatePlayerScore,
+  updatePlayerName,
+  joinRoom,
+} from "../Utils/firebase";
 import { GameMode } from "../Enums/GameMode";
 import { GameState } from "../Enums/GameState";
 import NameModal from "../components/NameModal";
@@ -13,7 +18,7 @@ import {
   setRoomSession,
   setUserName,
 } from "../Utils/storage";
-import { joinRoom } from "../Utils/firebase";
+// joinRoom imported above
 
 function Multiplayer() {
   const navigate = useNavigate();
@@ -23,17 +28,27 @@ function Multiplayer() {
   const [room, setRoom] = useState<Room | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
   const [needsName, setNeedsName] = useState(false);
+  const [session, setSession] = useState<{
+    playerId: string;
+    playerName: string;
+    isHost: boolean;
+  } | null>(null);
+  const [displayName, setDisplayName] = useState<string>("");
+  const lastSyncedRef = useRef<string | null>(null);
 
-  // Derive effective session from navigation state or localStorage
-  const effective = useMemo(() => {
-    if (!roomName) return null;
-    if (playerId && playerName) {
-      return { playerId, playerName, isHost: !!isHost };
-    }
-    const stored = getRoomSession(roomName);
-    if (stored) return stored;
-    return null;
-  }, [roomName, playerId, playerName, isHost]);
+  // Compute a players map that immediately reflects local name for self
+  const playersForDisplay = useMemo(() => {
+    if (!room?.players) return room?.players;
+    if (!session?.playerId) return room.players;
+    const localName = displayName || session.playerName || getUserName() || "";
+    const me = room.players[session.playerId];
+    if (!me) return room.players;
+    if (me.name === localName || !localName) return room.players;
+    return {
+      ...room.players,
+      [session.playerId]: { ...me, name: localName },
+    };
+  }, [room?.players, session?.playerId, session?.playerName, displayName]);
 
   useEffect(() => {
     if (!roomName) {
@@ -41,13 +56,31 @@ function Multiplayer() {
       return;
     }
 
-    // If we have no effective session, prompt for name and attempt auto-join
-    if (!effective) {
+    // Initialize session from navigation state or saved storage
+    if (playerId && playerName) {
+      const s = { playerId, playerName, isHost: !!isHost };
+      setSession(s);
+      setDisplayName(playerName);
+    } else {
+      const stored = getRoomSession(roomName);
+      if (stored) {
+        setSession(stored);
+        setDisplayName(stored.playerName);
+      } else {
+        setSession(null);
+      }
+    }
+
+    // If no session and no saved name, prompt for one
+    if (!playerId && !playerName && !getRoomSession(roomName)) {
       const fallbackName = getUserName();
       if (!fallbackName) {
         setNeedsName(true);
-        return;
+      } else {
+        setNeedsName(false);
+        setDisplayName(fallbackName);
       }
+    } else {
       setNeedsName(false);
     }
 
@@ -65,13 +98,31 @@ function Multiplayer() {
     });
 
     return () => unsubscribe();
-  }, [roomName, navigate, effective]);
+  }, [roomName, navigate, playerId, playerName, isHost]);
+
+  // After room data loads, ensure Firebase player name matches local session name
+  useEffect(() => {
+    if (!roomName || !room || !session || !session.playerId) return;
+    const p = room.players?.[session.playerId];
+    if (!p) return;
+    if (
+      p.name !== session.playerName &&
+      lastSyncedRef.current !== session.playerName
+    ) {
+      lastSyncedRef.current = session.playerName;
+      updatePlayerName(roomName, session.playerId, session.playerName).catch(
+        () => {
+          // ignore sync failures
+        }
+      );
+    }
+  }, [room?.players, session?.playerId, session?.playerName, roomName]);
 
   if (!room) return <div>Loading...</div>;
-  const activeId = effective?.playerId;
-  const activeName = effective?.playerName;
-  const activeHost = !!effective?.isHost;
-  if (!roomName || !activeId || !activeName)
+  const activeId = session?.playerId;
+  const activeHost = !!session?.isHost;
+  // Allow page to render while asking for a name
+  if (!roomName || (!needsName && !activeId))
     return <div>Invalid game session</div>;
 
   const handleStartGame = async () => {
@@ -86,6 +137,8 @@ function Multiplayer() {
     await startGame(roomName, grid);
   };
 
+  // (moved playersForDisplay useMemo above to avoid hook-order issues with early returns)
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
       {/* Header */}
@@ -96,7 +149,9 @@ function Multiplayer() {
           onClick={() => setNeedsName(true)}
           title="Edit your name"
         >
-          <span>{activeName}</span>
+          <span>
+            {displayName || session?.playerName || getUserName() || ""}
+          </span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
@@ -133,7 +188,7 @@ function Multiplayer() {
             roomId={roomName}
             playerId={activeId}
             isHost={activeHost}
-            players={room.players}
+            players={playersForDisplay || room.players}
             onStartGame={handleStartGame}
             onUpdateScore={(words) => {
               const score = words.reduce((total, word) => {
@@ -153,39 +208,37 @@ function Multiplayer() {
       {/* Name prompt for direct link join */}
       <NameModal
         isOpen={needsName}
-        initialName={getUserName() ?? activeName ?? ""}
+        initialName={displayName || session?.playerName || getUserName() || ""}
         title="Your Name"
-        confirmText={effective ? "OK" : "Join"}
+        confirmText={session ? "OK" : "Join"}
         onConfirm={async (name) => {
           if (!roomName) return;
           try {
-            // If already joined (effective exists), just update stored name and Firebase
-            if (effective) {
+            if (session) {
+              // Update locally and remotely
+              setDisplayName(name);
+              const updated = { ...session, playerName: name };
+              setSession(updated);
               setUserName(name);
-              setRoomSession(roomName, {
-                playerId: effective.playerId,
-                playerName: name,
-                isHost: effective.isHost,
-              });
-              // Best-effort update to Firebase
-              // Avoid import cycle by lazy import
-              const { updatePlayerName } = await import("../Utils/firebase");
-              await updatePlayerName(roomName, effective.playerId, name);
+              setRoomSession(roomName, updated);
+              await updatePlayerName(roomName, session.playerId, name);
               setNeedsName(false);
               return;
             }
-
-            // Otherwise, join the room now
+            // Join flow
             const newId = await joinRoom(roomName, name);
-            setUserName(name);
-            setRoomSession(roomName, {
+            const newSession = {
               playerId: newId,
               playerName: name,
               isHost: false,
-            });
+            };
+            setSession(newSession);
+            setDisplayName(name);
+            setUserName(name);
+            setRoomSession(roomName, newSession);
             setNeedsName(false);
-          } catch (e) {
-            // Stay on modal; in a real app we would show error.
+          } catch {
+            // keep modal open
           }
         }}
       />

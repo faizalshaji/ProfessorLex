@@ -41,9 +41,14 @@ export type Room = {
   gameState: GameState;
   startTime?: number;
   gameDuration: number;
+  gridSize?: number;
 };
 
-export const createRoom = async (roomName: string, hostName: string) => {
+export const createRoom = async (
+  roomName: string,
+  hostName: string,
+  options?: { gridSize?: number; gameDuration?: number }
+) => {
   try {
     console.log("Creating room with name:", roomName);
     const roomId = Math.random().toString(36).substring(2, 8);
@@ -63,7 +68,8 @@ export const createRoom = async (roomName: string, hostName: string) => {
       },
       grid: null,
       gameState: GameState.Waiting,
-      gameDuration: 60,
+      gameDuration: options?.gameDuration ?? 60,
+      gridSize: options?.gridSize,
     };
 
     console.log("Room object:", room);
@@ -103,6 +109,14 @@ export const joinRoom = async (roomId: string, playerName: string) => {
 
   await set(playerRef, newPlayer);
   return playerId;
+};
+
+export const updatePlayerName = async (
+  roomId: string,
+  playerId: string,
+  name: string
+) => {
+  await update(ref(db, `rooms/${roomId}/players/${playerId}`), { name });
 };
 
 export const updateRoomName = async (roomId: string, newName: string) => {

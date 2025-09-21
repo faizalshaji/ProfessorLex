@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createRoom, joinRoom } from "../Utils/firebase";
+import { getUserName, setUserName, setRoomSession } from "../Utils/storage";
 import Config from "./Config";
 import { MultiMode } from "../Enums/MultiMode";
 
@@ -20,6 +21,10 @@ export default function MultiplayerConfig(props: Props) {
   const navigate = useNavigate();
   const [multiMode, setMultiMode] = useState<MultiMode>(MultiMode.Join);
   const [playerName, setPlayerName] = useState("");
+  useEffect(() => {
+    const saved = getUserName();
+    if (saved) setPlayerName(saved);
+  }, []);
 
   const [joinError, setJoinError] = useState("");
   const [createError, setCreateError] = useState("");
@@ -52,11 +57,20 @@ export default function MultiplayerConfig(props: Props) {
     if (createError) return;
 
     try {
-      const result = await createRoom(playerName, playerName);
+      const result = await createRoom(playerName, playerName, {
+        gridSize,
+        gameDuration: time,
+      });
       if (!result) {
         setCreateError("Failed to create room");
         return;
       }
+      setUserName(playerName);
+      setRoomSession(result.roomId, {
+        playerId: result.playerId,
+        playerName,
+        isHost: true,
+      });
       navigate(`/multiplayer/${result.roomId}`, {
         state: {
           playerId: result.playerId,
@@ -82,6 +96,8 @@ export default function MultiplayerConfig(props: Props) {
         setJoinError("Failed to join room");
         return;
       }
+      setUserName(playerName);
+      setRoomSession(roomName, { playerId, playerName, isHost: false });
       navigate(`/multiplayer/${roomName}`, {
         state: { playerId, playerName, isHost: false, gridSize, time },
       });

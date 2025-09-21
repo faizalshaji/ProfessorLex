@@ -2,6 +2,9 @@ import { useState } from "react";
 import Board from "./Board/Board";
 import FoundWords from "./FoundWords/FoundWords";
 import { GameMode } from "../Enums/GameMode";
+import NameModal from "../components/NameModal";
+import { getUserName, setUserName } from "../Utils/storage";
+import { updatePlayerName } from "../Utils/firebase";
 
 interface GameProps {
   mode: GameMode;
@@ -28,8 +31,12 @@ export default function Game({
   players,
   isHost,
   onStartGame,
+  roomId,
+  playerId,
 }: GameProps) {
   const [foundWords, setFoundWords] = useState<string[]>([]);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [currentName, setCurrentName] = useState<string>(getUserName() || "");
 
   const handleWordsChange = (words: string[]) => {
     setFoundWords(words);
@@ -124,6 +131,14 @@ export default function Game({
 
           {/* Center Panel */}
           <div className="flex-1 overflow-hidden flex items-center justify-center relative">
+            {/* Settings Floating Button */}
+            <button
+              onClick={() => setShowNameModal(true)}
+              className="absolute top-4 right-4 z-20 px-3 py-2 rounded-lg bg-[#2F6F5F] hover:bg-[#3A8A75] text-white text-sm shadow-lg"
+              title="Change name"
+            >
+              Settings
+            </button>
             <div className="max-h-full p-6">
               <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] hover:shadow-[0_0_50px_rgba(47,111,95,0.2)] transition-shadow duration-300 relative">
                 <Board
@@ -176,6 +191,26 @@ export default function Game({
           </div>
         </footer>
       </div>
+      {/* Name Modal */}
+      <NameModal
+        isOpen={showNameModal}
+        initialName={currentName}
+        title="Change your display name"
+        confirmText="Save"
+        onCancel={() => setShowNameModal(false)}
+        onConfirm={async (name) => {
+          setCurrentName(name);
+          setUserName(name);
+          setShowNameModal(false);
+          if (mode === GameMode.MultiPlayer && roomId && playerId) {
+            try {
+              await updatePlayerName(roomId, playerId, name);
+            } catch {
+              // ignore
+            }
+          }
+        }}
+      />
     </div>
   );
 }

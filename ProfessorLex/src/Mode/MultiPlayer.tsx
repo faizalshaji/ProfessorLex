@@ -1,11 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { getDatabase, ref, onValue } from "firebase/database";
 import Game from "../Game/Game";
-import type { Room, RoomPlayer } from "../Utils/firebase";
+import type { Room } from "../Utils/firebase";
 import { startGame, updatePlayerScore } from "../Utils/firebase";
 import { GameMode } from "../Enums/GameMode";
 import { GameState } from "../Enums/GameState";
+import NameModal from "../components/NameModal";
+import {
+  getRoomSession,
+  getUserName,
+  setRoomSession,
+  setUserName,
+} from "../Utils/storage";
+import { joinRoom } from "../Utils/firebase";
 
 function Multiplayer() {
   const navigate = useNavigate();
@@ -14,11 +22,33 @@ function Multiplayer() {
   const { gridSize, time, playerId, playerName, isHost } = location.state || {};
   const [room, setRoom] = useState<Room | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
+  const [needsName, setNeedsName] = useState(false);
+
+  // Derive effective session from navigation state or localStorage
+  const effective = useMemo(() => {
+    if (!roomName) return null;
+    if (playerId && playerName) {
+      return { playerId, playerName, isHost: !!isHost };
+    }
+    const stored = getRoomSession(roomName);
+    if (stored) return stored;
+    return null;
+  }, [roomName, playerId, playerName, isHost]);
 
   useEffect(() => {
-    if (!roomName || !playerId || !playerName) {
+    if (!roomName) {
       navigate("/");
       return;
+    }
+
+    // If we have no effective session, prompt for name and attempt auto-join
+    if (!effective) {
+      const fallbackName = getUserName();
+      if (!fallbackName) {
+        setNeedsName(true);
+        return;
+      }
+      setNeedsName(false);
     }
 
     const db = getDatabase();
@@ -35,10 +65,14 @@ function Multiplayer() {
     });
 
     return () => unsubscribe();
-  }, [roomName, navigate, playerId, playerName]);
+  }, [roomName, navigate, effective]);
 
   if (!room) return <div>Loading...</div>;
-  if (!roomName || !playerId) return <div>Invalid game session</div>;
+  const activeId = effective?.playerId;
+  const activeName = effective?.playerName;
+  const activeHost = !!effective?.isHost;
+  if (!roomName || !activeId || !activeName)
+    return <div>Invalid game session</div>;
 
   const handleStartGame = async () => {
     if (!roomName || !gridSize) return;
@@ -57,7 +91,16 @@ function Multiplayer() {
       {/* Header */}
       <div className="flex justify-between items-center p-4  bg-[#0A2F2F]/90 backdrop-blur-md text-white">
         <h2 className="text-xl font-bold">Room: {room.id}</h2>
-        {isHost && !gameStarted && (
+        <div className="flex items-center gap-3">
+          <div className="text-sm text-gray-300">You: {activeName}</div>
+          <button
+            className="px-3 py-1 rounded bg-[#2F6F5F] hover:bg-[#3A8A75] text-white text-sm"
+            onClick={() => setNeedsName(true)}
+          >
+            Change name
+          </button>
+        </div>
+        {activeHost && !gameStarted && (
           <button
             onClick={handleStartGame}
             className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded transition-colors"
@@ -65,7 +108,7 @@ function Multiplayer() {
             Start Game
           </button>
         )}
-        {!isHost && !gameStarted && (
+        {!activeHost && !gameStarted && (
           <div className="text-sm text-gray-400">
             Waiting for host to start...
           </div>
@@ -78,12 +121,12 @@ function Multiplayer() {
         <div className="flex-1">
           <Game
             mode={GameMode.MultiPlayer}
-            gridSize={gridSize}
-            time={time}
+            gridSize={gridSize ?? room.gridSize ?? 5}
+            time={time ?? room.gameDuration ?? 60}
             gameStarted={gameStarted}
             roomId={roomName}
-            playerId={playerId}
-            isHost={isHost}
+            playerId={activeId}
+            isHost={activeHost}
             players={room.players}
             onStartGame={handleStartGame}
             onUpdateScore={(words) => {
@@ -95,11 +138,34 @@ function Multiplayer() {
                   extraLetters > 0 ? Math.pow(1.5, extraLetters - 1) * 20 : 0;
                 return total + Math.floor(baseScore + bonus);
               }, 0);
-              updatePlayerScore(roomName, playerId, score, words);
+              if (activeId) updatePlayerScore(roomName, activeId, score, words);
             }}
           />
         </div>
       </div>
+
+      {/* Name prompt for direct link join */}
+      <NameModal
+        isOpen={needsName}
+        initialName={getUserName() ?? ""}
+        title="Enter your name to join"
+        confirmText="Join"
+        onConfirm={async (name) => {
+          if (!roomName) return;
+          try {
+            const newId = await joinRoom(roomName, name);
+            setUserName(name);
+            setRoomSession(roomName, {
+              playerId: newId,
+              playerName: name,
+              isHost: false,
+            });
+            setNeedsName(false);
+          } catch (e) {
+            // Stay on modal; in a real app we would show error.
+          }
+        }}
+      />
     </div>
   );
 }

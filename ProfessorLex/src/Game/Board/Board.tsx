@@ -18,6 +18,8 @@ interface BoardProps {
   gridSize?: number;
   initialTime?: number;
   gameStarted?: boolean;
+  canPlayAgain?: boolean; // controls showing Play Again button
+  onPlayAgain?: () => void; // optional external handler for Play Again
 }
 
 function Board({
@@ -25,6 +27,8 @@ function Board({
   gridSize = 5,
   initialTime = 60,
   gameStarted: isGameEnabled = false,
+  canPlayAgain = true,
+  onPlayAgain,
 }: BoardProps) {
   const GRID_SIZE = gridSize;
   const [grid, setGrid] = useState<CellType[][]>([]);
@@ -718,12 +722,14 @@ function Board({
       {time === 0 && (
         <div>
           <GameOver score={score} />{" "}
-          <button
-            onClick={restartGame}
-            className="w-full py-3 mt-6 bg-[#2F6F5F] hover:bg-[#3A8A75] backdrop-blur-sm text-white font-semibold rounded-xl shadow-lg shadow-[#1A472F]/20 hover:shadow-[#2F6F5F]/40 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            Play Again
-          </button>
+          {canPlayAgain && (
+            <button
+              onClick={onPlayAgain ? onPlayAgain : restartGame}
+              className="w-full py-3 mt-6 bg-[#2F6F5F] hover:bg-[#3A8A75] backdrop-blur-sm text-white font-semibold rounded-xl shadow-lg shadow-[#1A472F]/20 hover:shadow-[#2F6F5F]/40 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Play Again
+            </button>
+          )}
         </div>
       )}
     </div>

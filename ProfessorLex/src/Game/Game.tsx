@@ -52,9 +52,13 @@ export default function Game({
             Game Not Started
           </h2>
           {mode === GameMode.MultiPlayer ? (
-            <p className="text-[#2F6F5F] text-lg">
-              Waiting for the room owner to start the game...
-            </p>
+            isHost ? (
+              <p className="text-[#2F6F5F] text-lg">You’re the host. Start the game when ready.</p>
+            ) : (
+              <p className="text-[#2F6F5F] text-lg">
+                Waiting for the room owner to start the game...
+              </p>
+            )
           ) : (
             <p className="text-[#2F6F5F] text-lg">Starting game...</p>
           )}
@@ -143,6 +147,10 @@ export default function Game({
                   gridSize={gridSize}
                   initialTime={time}
                   gameStarted={gameStarted}
+                  canPlayAgain={mode === GameMode.SinglePlayer || !!isHost}
+                  onPlayAgain={
+                    mode === GameMode.MultiPlayer && isHost ? onStartGame : undefined
+                  }
                 />
                 {!gameStarted && (
                   <div className="absolute inset-0 bg-black/30 cursor-not-allowed rounded-3xl"></div>

@@ -277,7 +277,7 @@ export default function Game({
       {mode === GameMode.MultiPlayer && showWinners && (
         <WinnersPopup
           players={sortedPlayers}
-          durationMs={8000}
+          durationMs={15000}
           onClose={() => setShowWinners(false)}
         />
       )}

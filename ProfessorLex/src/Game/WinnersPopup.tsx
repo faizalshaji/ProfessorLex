@@ -4,13 +4,13 @@ type PlayerLite = { id: string; name: string; score: number };
 
 type WinnersPopupProps = {
   players: PlayerLite[]; // already sorted desc by score
-  durationMs?: number; // default 8000
+  durationMs?: number; // default 15000
   onClose: () => void;
 };
 
 export default function WinnersPopup({
   players,
-  durationMs = 8000,
+  durationMs = 15000,
   onClose,
 }: WinnersPopupProps) {
   const [remaining, setRemaining] = useState(Math.ceil(durationMs / 1000));

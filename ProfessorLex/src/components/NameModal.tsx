@@ -41,12 +41,24 @@ export default function NameModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
-      <div className="bg-[#0A2F2F]/95 border border-[#2F6F5F]/30 rounded-xl w-96 max-w-[90%] p-6 text-white">
+      <form
+        className="bg-[#0A2F2F]/95 border border-[#2F6F5F]/30 rounded-xl w-96 max-w-[90%] p-6 text-white"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleConfirm();
+        }}
+      >
         <h3 className="text-lg font-semibold mb-4">{title}</h3>
         <input
           autoFocus
           value={name}
           onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleConfirm();
+            }
+          }}
           placeholder="Your name"
           className={`w-full px-4 py-3 bg-[#2F6F5F]/30 border ${
             error ? "border-red-500" : "border-[#2F6F5F]/50"
@@ -63,13 +75,13 @@ export default function NameModal({
             </button>
           )}
           <button
-            onClick={handleConfirm}
+            type="submit"
             className="px-4 py-2 rounded-lg bg-[#2F6F5F] hover:bg-[#3A8A75] text-white"
           >
             {confirmText}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

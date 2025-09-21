@@ -90,8 +90,10 @@ export default function Game({
                                 {idx + 1}
                               </span>
                               {player.name}
-                              {player.isHost && player.score > 0 && (
-                                <span className="text-[#3A8A75]">👑</span>
+                              {idx < 3 && (
+                                <span className="text-[#3A8A75]">
+                                  {idx === 0 ? "🥇" : idx === 1 ? "🥈" : "🥉"}
+                                </span>
                               )}
                             </span>
                             <span className="text-[#3A8A75]">

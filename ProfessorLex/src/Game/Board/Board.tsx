@@ -36,6 +36,7 @@ function Board({
   const [trie, setTrie] = useState<any>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const gameOverSoundPlayed = useRef(false);
   const gameStarted = useRef(false);
   const initialLoadComplete = useRef(false);
@@ -86,6 +87,14 @@ function Board({
     drawArrows(trace);
   }, [trace]);
 
+  // Focus the container so it can capture keyboard input
+  useEffect(() => {
+    // Only auto-focus when game is enabled
+    if (isGameEnabled && !isGameOver && time > 0) {
+      containerRef.current?.focus();
+    }
+  }, [isGameEnabled, isGameOver, time]);
+
   async function loadTrie(): Promise<any> {
     const words = await loadWords();
     return Trie(words);
@@ -133,6 +142,102 @@ function Board({
       console.error("Error restarting game:", error);
     }
   };
+
+  // Utility to get current word from trace
+  const currentTraceWord = () =>
+    trace
+      .map((c) => c.letter)
+      .join("")
+      .toLowerCase();
+
+  // Find a valid path in the grid for the given word using DFS (no cell reuse, 8-way adjacency)
+  function findPathForWord(word: string): CellType[] | null {
+    if (!grid.length || !word) return [];
+    const lower = word.toLowerCase();
+
+    const dirs = [
+      [-1, -1],
+      [-1, 0],
+      [-1, 1],
+      [0, -1],
+      [0, 1],
+      [1, -1],
+      [1, 0],
+      [1, 1],
+    ];
+
+    const visited: boolean[][] = Array(GRID_SIZE)
+      .fill(null)
+      .map(() => Array(GRID_SIZE).fill(false));
+
+    function dfs(
+      r: number,
+      c: number,
+      idx: number,
+      path: CellType[]
+    ): CellType[] | null {
+      if (grid[r][c].letter.toLowerCase() !== lower[idx]) return null;
+      visited[r][c] = true;
+      path.push(grid[r][c]);
+      if (idx === lower.length - 1) return path.slice();
+
+      // Explore neighbors in stable order (top-left to bottom-right)
+      for (const [dr, dc] of dirs) {
+        const nr = r + dr;
+        const nc = c + dc;
+        if (
+          nr >= 0 &&
+          nr < GRID_SIZE &&
+          nc >= 0 &&
+          nc < GRID_SIZE &&
+          !visited[nr][nc]
+        ) {
+          const res = dfs(nr, nc, idx + 1, path);
+          if (res) return res;
+        }
+      }
+
+      // backtrack
+      path.pop();
+      visited[r][c] = false;
+      return null;
+    }
+
+    // Try every matching starting cell, row-major deterministic
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (grid[r][c].letter.toLowerCase() !== lower[0]) continue;
+        // reset visited for each attempt
+        for (let i = 0; i < GRID_SIZE; i++) visited[i].fill(false);
+        const res = dfs(r, c, 0, []);
+        if (res) return res;
+      }
+    }
+    return null;
+  }
+
+  // Submit current trace (shared by mouse-up and Enter key)
+  function submitTrace() {
+    if (isGameOver || time === 0) return;
+    if (!trace.length || !trie) {
+      setTrace([]);
+      return;
+    }
+    const word = currentTraceWord();
+    if (word.length > 2) {
+      if (trie.hasWord(word) && !foundWords.includes(word)) {
+        const newWords = [...foundWords, word];
+        setFoundWords(newWords);
+        onWordsChange(newWords);
+        const newScore = calculateWordScore(word.length);
+        setScore((s) => s + newScore);
+        playValidWord();
+      } else {
+        playInvalidWord();
+      }
+    }
+    setTrace([]);
+  }
   function findAllWords(grid: CellType[][]): string[] {
     const allWords: Set<string> = new Set();
     if (!trie) return [];
@@ -334,6 +439,8 @@ function Board({
     if (isGameOver || time === 0) return;
     setTrace([cell]);
     playSelectLetter();
+    // Ensure keyboard focus follows mouse interaction
+    containerRef.current?.focus();
   }
 
   function calculateWordScore(wordLength: number): number {
@@ -349,28 +456,7 @@ function Board({
   }
 
   function onMouseUp() {
-    if (isGameOver || time === 0) return;
-    if (!trace.length || !trie) {
-      setTrace([]);
-      return;
-    }
-    const word = trace
-      .map((c) => c.letter)
-      .join("")
-      .toLowerCase();
-    if (word.length > 2) {
-      if (trie.hasWord(word) && !foundWords.includes(word)) {
-        const newWords = [...foundWords, word];
-        setFoundWords(newWords);
-        onWordsChange(newWords);
-        const newScore = calculateWordScore(word.length);
-        setScore((s) => s + newScore);
-        playValidWord();
-      } else {
-        playInvalidWord();
-      }
-    }
-    setTrace([]);
+    submitTrace();
   }
 
   function drawArrows(trace: CellType[]) {
@@ -483,6 +569,73 @@ function Board({
     <div
       className="relative  text-white p-6 text-center select-none"
       onMouseUp={onMouseUp}
+      ref={containerRef}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (!isGameEnabled || isGameOver || time === 0) return;
+        const key = e.key;
+        // Handle Enter submission
+        if (key === "Enter") {
+          e.preventDefault();
+          submitTrace();
+          return;
+        }
+        // Handle Escape to clear current trace
+        if (key === "Escape") {
+          e.preventDefault();
+          setTrace([]);
+          return;
+        }
+        // Handle Backspace to remove last letter
+        if (key === "Backspace") {
+          e.preventDefault();
+          if (trace.length > 0) {
+            setTrace(trace.slice(0, -1));
+          }
+          return;
+        }
+        // Letter keys A-Z
+        if (key.length === 1 && /[a-zA-Z]/.test(key)) {
+          const letter = key.toLowerCase();
+          // Prefer extending from current trace's last cell if present
+          if (trace.length > 0) {
+            const last = trace[trace.length - 1];
+            const visited = new Set(trace.map((c) => `${c.row},${c.col}`));
+            let extended = false;
+            for (let dr = -1; dr <= 1 && !extended; dr++) {
+              for (let dc = -1; dc <= 1 && !extended; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const nr = last.row + dr;
+                const nc = last.col + dc;
+                if (
+                  nr >= 0 &&
+                  nr < GRID_SIZE &&
+                  nc >= 0 &&
+                  nc < GRID_SIZE &&
+                  !visited.has(`${nr},${nc}`) &&
+                  grid[nr][nc].letter.toLowerCase() === letter
+                ) {
+                  setTrace([...trace, grid[nr][nc]]);
+                  playSelectLetter();
+                  extended = true;
+                }
+              }
+            }
+            if (extended) return;
+          }
+
+          // Otherwise, compute a full path for the next word
+          const nextWord = currentTraceWord() + letter;
+          const path = findPathForWord(nextWord);
+          if (path && path.length) {
+            // Play select only if we are extending the path
+            if (path.length > trace.length) {
+              playSelectLetter();
+            }
+            setTrace(path);
+          }
+        }
+      }}
     >
       <h1 className="text-4xl  text-white font-extrabold mb-6 tracking-wide ">
         Professor Lex

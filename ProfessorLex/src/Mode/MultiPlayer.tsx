@@ -35,7 +35,9 @@ function Multiplayer() {
     playerName: string;
     isHost: boolean;
   } | null>(null);
-  const [displayName, setDisplayName] = useState<string>(() => getUserName() || "");
+  const [displayName, setDisplayName] = useState<string>(
+    () => getUserName() || ""
+  );
   const lastSyncedRef = useRef<string | null>(null);
 
   // Compute a players map that immediately reflects local name for self
@@ -69,9 +71,10 @@ function Multiplayer() {
       const stored = getRoomSession(roomName);
       if (stored) {
         const local = getUserName();
-        const merged = local && local !== stored.playerName
-          ? { ...stored, playerName: local }
-          : stored;
+        const merged =
+          local && local !== stored.playerName
+            ? { ...stored, playerName: local }
+            : stored;
         setSession(merged);
         setDisplayName(merged.playerName);
         if (merged !== stored) {

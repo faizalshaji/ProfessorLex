@@ -21,6 +21,10 @@ interface BoardProps {
   canPlayAgain?: boolean; // controls showing Play Again button
   onPlayAgain?: () => void; // optional external handler for Play Again
   onGameOver?: () => void; // optional callback when timer hits 0
+  onMissedWordsAvailable?: (
+    words: string[],
+    highlight: (word: string) => void
+  ) => void; // provide missed words and a highlighter back to parent
 }
 
 function Board({
@@ -31,11 +35,13 @@ function Board({
   canPlayAgain = true,
   onPlayAgain,
   onGameOver,
+  onMissedWordsAvailable,
 }: BoardProps) {
   const GRID_SIZE = gridSize;
   const [grid, setGrid] = useState<CellType[][]>([]);
   const [trace, setTrace] = useState<CellType[]>([]);
   const [foundWords, setFoundWords] = useState<string[]>([]);
+  // Missed words are computed post-game and sent to parent; no local UI state needed here
   const [score, setScore] = useState(0);
   const [time, setTime] = useState(initialTime);
   const [isGameOver, setIsGameOver] = useState(false);
@@ -156,6 +162,14 @@ function Board({
       setTrace([]);
       setScore(0);
       setTime(initialTime);
+      // Inform parent to clear any missed words panel
+      try {
+        onMissedWordsAvailable &&
+          onMissedWordsAvailable([], (w: string) => {
+            const path = findPathForWord(w) || [];
+            setTrace(path);
+          });
+      } catch {}
 
       // Initialize new grid
       initGrid();
@@ -332,6 +346,27 @@ function Board({
 
     return Array.from(allWords);
   }
+
+  // Provide a way for parent to request a highlight for a chosen word
+  const highlightWord = (word: string) => {
+    if (!word) return;
+    const path = findPathForWord(word) || [];
+    setTrace(path);
+  };
+
+  // When game ends, compute the missed words list and pass to parent
+  useEffect(() => {
+    if (!isGameOver) return;
+    try {
+      const all = findAllWords(grid);
+      const foundSet = new Set(foundWords.map((w) => w.toLowerCase()));
+      const missed = all
+        .filter((w) => !foundSet.has(w.toLowerCase()))
+        .sort((a, b) => b.length - a.length || a.localeCompare(b));
+      onMissedWordsAvailable && onMissedWordsAvailable(missed, highlightWord);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGameOver]);
 
   function generateGrid(): CellType[][] {
     const randomLetter = () => {

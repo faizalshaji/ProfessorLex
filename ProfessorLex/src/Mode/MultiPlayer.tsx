@@ -209,8 +209,8 @@ function Multiplayer() {
           </button>
           <h2 className="text-xl font-bold">Room: {room.id}</h2>
         </div>
-  {/* Center: (intentionally empty; Start button moved to center waiting panel) */}
-  <div className="flex items-center justify-center" />
+        {/* Center: (intentionally empty; Start button moved to center waiting panel) */}
+        <div className="flex items-center justify-center" />
         {/* Right: Player name + settings (only after join) */}
         <div className="flex justify-end">
           {activeId && (

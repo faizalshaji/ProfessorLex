@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Board from "./Board/Board";
 import FoundWords from "./FoundWords/FoundWords";
 import { GameMode } from "../Enums/GameMode";
@@ -34,6 +34,8 @@ export default function Game({
   isWaiting,
 }: GameProps) {
   const [foundWords, setFoundWords] = useState<string[]>([]);
+  const [missedWords, setMissedWords] = useState<string[]>([]);
+  const highlightMissedRef = useRef<((w: string) => void) | null>(null);
 
   const handleWordsChange = (words: string[]) => {
     setFoundWords(words);
@@ -152,6 +154,10 @@ export default function Game({
                         ? onGameOver
                         : undefined
                     }
+                    onMissedWordsAvailable={(missed, highlight) => {
+                      setMissedWords(missed);
+                      highlightMissedRef.current = highlight;
+                    }}
                   />
                 </div>
               )}
@@ -168,8 +174,37 @@ export default function Game({
                 </span>
               </h3>
             </div>
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-6">
               <FoundWords words={foundWords} />
+
+              {/* Missed Words panel */}
+              {missedWords.length > 0 && (
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <h4 className="text-lg font-semibold text-white">
+                      Missed Words
+                    </h4>
+                    <span className="text-sm text-[#3A8A75]">
+                      ({missedWords.length})
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-1">
+                    {missedWords.map((w, idx) => (
+                      <button
+                        key={w + idx}
+                        onClick={() =>
+                          highlightMissedRef.current &&
+                          highlightMissedRef.current(w)
+                        }
+                        className="w-full text-left px-2 py-1 rounded hover:bg-[#2F6F5F]/30 text-[#BFE2D5]"
+                        title="Click to highlight on board"
+                      >
+                        {w}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

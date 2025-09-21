@@ -171,7 +171,9 @@ export default function Game({
               <div className="p-4 border-b border-[#2F6F5F]/30">
                 <h3 className="text-xl font-semibold text-white tracking-wide flex items-center gap-2">
                   <span>Found Words</span>
-                  <span className="text-sm text-[#3A8A75]">({foundWords.length})</span>
+                  <span className="text-sm text-[#3A8A75]">
+                    ({foundWords.length})
+                  </span>
                 </h3>
               </div>
               <div className="flex-1 overflow-y-auto p-4">
@@ -187,7 +189,9 @@ export default function Game({
               <div className="p-4 border-b border-[#2F6F5F]/30">
                 <h3 className="text-xl font-semibold text-white tracking-wide flex items-center justify-between">
                   <span>Missed Words</span>
-                  <span className="text-sm text-[#3A8A75]">({missedWords.length})</span>
+                  <span className="text-sm text-[#3A8A75]">
+                    ({missedWords.length})
+                  </span>
                 </h3>
               </div>
               <div className="flex-1 overflow-y-auto p-4">
@@ -196,7 +200,10 @@ export default function Game({
                     {missedWords.map((w, idx) => (
                       <button
                         key={w + idx}
-                        onClick={() => highlightMissedRef.current && highlightMissedRef.current(w)}
+                        onClick={() =>
+                          highlightMissedRef.current &&
+                          highlightMissedRef.current(w)
+                        }
                         className="w-full text-left px-2 py-1 rounded hover:bg-[#2F6F5F]/30 text-[#BFE2D5]"
                         title="Click to highlight on board"
                       >
@@ -205,7 +212,9 @@ export default function Game({
                     ))}
                   </div>
                 ) : (
-                  <div className="text-[#2F6F5F] text-sm">No missed words yet</div>
+                  <div className="text-[#2F6F5F] text-sm">
+                    No missed words yet
+                  </div>
                 )}
               </div>
             </div>
@@ -222,12 +231,16 @@ export default function Game({
               </span>
             </div>
             <div className="text-[#2F6F5F]">•</div>
-            {mode === GameMode.MultiPlayer && (
-              <div className="flex items-center gap-2">
-                <span className="text-[#2F6F5F]">🎮</span>
-                <span className="text-white">Multiplayer</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <span className="text-[#2F6F5F]">
+                {mode === GameMode.MultiPlayer ? "🎮🎮" : "🎮"}
+              </span>
+              <span className="text-white">
+                {mode === GameMode.MultiPlayer
+                  ? "Multiplayer"
+                  : "Single Player"}
+              </span>
+            </div>
           </div>
         </footer>
       </div>

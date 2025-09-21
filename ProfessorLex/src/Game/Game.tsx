@@ -56,58 +56,45 @@ export default function Game({
       />
 
       <div className="relative z-10 flex flex-col w-full h-full bg-gradient-to-b from-[#0A2F2F]/80 via-transparent to-[#0A2F2F]/80">
-        {/* Main Content */}
-        <div className="flex flex-1 min-h-0">
-          {/* Left Panel Placeholder */}
-          <div className="w-64 flex-shrink-0">
-            {mode === GameMode.MultiPlayer && (
-              <div className="h-full bg-[#0A2F2F]/90 backdrop-blur-md border-r border-[#2F6F5F]/30 flex flex-col">
-                <div className="p-4 border-b border-[#2F6F5F]/30">
-                  <h3 className="text-lg font-semibold text-white">Players</h3>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4">
-                  {players ? (
-                    Object.values(players)
-                      .sort((a, b) => {
-                        const byScore = b.score - a.score;
-                        return byScore !== 0
-                          ? byScore
-                          : a.name.localeCompare(b.name);
-                      })
-                      .map((player, idx) => (
-                        <div
-                          key={player.id}
-                          className={`p-3 rounded-lg border backdrop-blur-sm transition-all duration-200 ${
-                            player.isHost
-                              ? "bg-[#2F6F5F]/20 border-[#2F6F5F]/30 hover:bg-[#2F6F5F]/30"
-                              : "bg-[#0A2F2F]/40 border-[#2F6F5F]/20 hover:bg-[#0A2F2F]/60"
-                          }`}
-                        >
-                          <div className="flex justify-between items-center">
-                            <span className="flex items-center gap-2 text-white">
-                              <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold rounded-full bg-[#1F574A] text-white">
-                                {idx + 1}
-                              </span>
-                              {player.name}
-                              {player.isHost && player.score > 0 && (
-                                <span className="text-[#3A8A75]">👑</span>
-                              )}
-                            </span>
-                            <span className="text-[#3A8A75]">
-                              {player.score}
-                            </span>
-                          </div>
-                        </div>
-                      ))
-                  ) : (
-                    <div className="text-[#2F6F5F] text-center mt-4">
-                      No players yet
-                    </div>
-                  )}
-                </div>
+        {/* Main 3-column content */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left Panel (Multiplayer only): Players/Scoreboard */}
+          {mode === GameMode.MultiPlayer && (
+            <div className="w-72 bg-[#0A2F2F]/90 backdrop-blur-md border-r border-[#2F6F5F]/30 overflow-hidden flex flex-col">
+              <div className="p-4 border-b border-[#2F6F5F]/30">
+                <h3 className="text-xl font-semibold text-white tracking-wide">
+                  Players
+                </h3>
               </div>
-            )}
-          </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                {players && Object.values(players).length > 0 ? (
+                  Object.values(players)
+                    .sort((a, b) => b.score - a.score)
+                    .map((player, idx) => (
+                      <div
+                        key={player.id}
+                        className="flex items-center justify-between py-2 border-b border-[#2F6F5F]/20 last:border-b-0"
+                      >
+                        <span className="flex items-center gap-2 text-white">
+                          <span className="text-[#3A8A75] font-semibold w-5 text-right">
+                            {idx + 1}
+                          </span>
+                          {player.name}
+                          {idx === 0 && player.score > 0 && (
+                            <span className="text-[#3A8A75]">👑</span>
+                          )}
+                        </span>
+                        <span className="text-[#3A8A75]">{player.score}</span>
+                      </div>
+                    ))
+                ) : (
+                  <div className="text-[#2F6F5F] text-center mt-4">
+                    No players yet
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Center Panel */}
           <div className="flex-1 overflow-hidden flex items-center justify-center relative">
@@ -181,69 +168,65 @@ export default function Game({
               </div>
             </div>
 
-            {/* Divider */}
-            <div className="h-px bg-[#2F6F5F]/30" />
-
-            {/* Missed Words Section */}
-            <div className="flex-1 min-h-0 flex flex-col">
-              <div className="p-4 border-b border-[#2F6F5F]/30">
-                <h3 className="text-xl font-semibold text-white tracking-wide flex items-center justify-between">
-                  <span>Missed Words</span>
-                  <span className="text-sm text-[#3A8A75]">
-                    ({missedWords.length})
-                  </span>
-                </h3>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4">
-                {missedWords.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-1">
-                    {missedWords.map((w, idx) => (
-                      <button
-                        key={w + idx}
-                        onClick={() =>
-                          highlightMissedRef.current &&
-                          highlightMissedRef.current(w)
-                        }
-                        className="w-full text-left px-2 py-1 rounded hover:bg-[#2F6F5F]/30 text-[#BFE2D5]"
-                        title="Click to highlight on board"
-                      >
-                        {w}
-                      </button>
-                    ))}
+            {/* Missed Words: only after game finishes (populated) */}
+            {missedWords.length > 0 && (
+              <>
+                <div className="h-px bg-[#2F6F5F]/30" />
+                <div className="flex-1 min-h-0 flex flex-col">
+                  <div className="p-4 border-b border-[#2F6F5F]/30">
+                    <h3 className="text-xl font-semibold text-white tracking-wide flex items-center justify-between">
+                      <span>Missed Words</span>
+                      <span className="text-sm text-[#3A8A75]">
+                        ({missedWords.length})
+                      </span>
+                    </h3>
                   </div>
-                ) : (
-                  <div className="text-[#2F6F5F] text-sm">
-                    No missed words yet
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <div className="grid grid-cols-1 gap-1">
+                      {missedWords.map((w, idx) => (
+                        <button
+                          key={w + idx}
+                          onClick={() =>
+                            highlightMissedRef.current &&
+                            highlightMissedRef.current(w)
+                          }
+                          className="w-full text-left px-2 py-1 rounded hover:bg-[#2F6F5F]/30 text-[#BFE2D5]"
+                          title="Click to highlight on board"
+                        >
+                          {w}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
-
-        {/* Footer */}
-        <footer className="bg-[#0A2F2F] border-t border-[#2F6F5F]/30 py-2 px-4 flex-none">
-          <div className="w-full flex justify-center items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-[#2F6F5F]">🎲</span>
-              <span className="text-white">
-                Grid Size: {gridSize}x{gridSize}
-              </span>
-            </div>
-            <div className="text-[#2F6F5F]">•</div>
-            <div className="flex items-center gap-2">
-              <span className="text-[#2F6F5F]">
-                {mode === GameMode.MultiPlayer ? "🎮🎮" : "🎮"}
-              </span>
-              <span className="text-white">
-                {mode === GameMode.MultiPlayer
-                  ? "Multiplayer"
-                  : "Single Player"}
-              </span>
-            </div>
-          </div>
-        </footer>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-[#0A2F2F] border-t border-[#2F6F5F]/30 py-2 px-4 flex-none">
+        <div className="w-full flex justify-center items-center gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-[#2F6F5F]">🎲</span>
+            <span className="text-white">
+              Grid Size: {gridSize}x{gridSize}
+            </span>
+          </div>
+          <div className="text-[#2F6F5F]">•</div>
+          <div className="flex items-center gap-2">
+            <span className="text-[#2F6F5F]">
+              {mode === GameMode.MultiPlayer ? "🎮🎮" : "🎮"}
+            </span>
+            <span className="text-white">
+              {mode === GameMode.MultiPlayer
+                ? "Multiplayer"
+                : "Single Player"}
+            </span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

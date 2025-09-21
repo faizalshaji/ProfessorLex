@@ -36,6 +36,7 @@ export default function Game({
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [missedWords, setMissedWords] = useState<string[]>([]);
   const highlightMissedRef = useRef<((w: string) => void) | null>(null);
+  const [isGameOver, setIsGameOver] = useState(false);
 
   const handleWordsChange = (words: string[]) => {
     setFoundWords(words);
@@ -154,6 +155,7 @@ export default function Game({
                         ? onGameOver
                         : undefined
                     }
+                    onGameOverStateChange={(over) => setIsGameOver(over)}
                     onMissedWordsAvailable={(missed, highlight) => {
                       setMissedWords(missed);
                       highlightMissedRef.current = highlight;
@@ -184,40 +186,42 @@ export default function Game({
             {/* Divider */}
             <div className="h-px bg-[#2F6F5F]/30" />
 
-            {/* Missed Words Section */}
-            <div className="flex-1 min-h-0 flex flex-col">
-              <div className="p-4 border-b border-[#2F6F5F]/30">
-                <h3 className="text-xl font-semibold text-white tracking-wide flex items-center justify-between">
-                  <span>Missed Words</span>
-                  <span className="text-sm text-[#3A8A75]">
-                    ({missedWords.length})
-                  </span>
-                </h3>
+            {/* Missed Words Section - hidden until game over */}
+            {isGameOver && (
+              <div className="flex-1 min-h-0 flex flex-col">
+                <div className="p-4 border-b border-[#2F6F5F]/30">
+                  <h3 className="text-xl font-semibold text-white tracking-wide flex items-center justify-between">
+                    <span>Missed Words</span>
+                    <span className="text-sm text-[#3A8A75]">
+                      ({missedWords.length})
+                    </span>
+                  </h3>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4">
+                  {missedWords.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-1">
+                      {missedWords.map((w, idx) => (
+                        <button
+                          key={w + idx}
+                          onClick={() =>
+                            highlightMissedRef.current &&
+                            highlightMissedRef.current(w)
+                          }
+                          className="w-full text-left px-2 py-1 rounded hover:bg-[#2F6F5F]/30 text-[#BFE2D5]"
+                          title="Click to highlight on board"
+                        >
+                          {w}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-[#2F6F5F] text-sm">
+                      No missed words
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex-1 overflow-y-auto p-4">
-                {missedWords.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-1">
-                    {missedWords.map((w, idx) => (
-                      <button
-                        key={w + idx}
-                        onClick={() =>
-                          highlightMissedRef.current &&
-                          highlightMissedRef.current(w)
-                        }
-                        className="w-full text-left px-2 py-1 rounded hover:bg-[#2F6F5F]/30 text-[#BFE2D5]"
-                        title="Click to highlight on board"
-                      >
-                        {w}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-[#2F6F5F] text-sm">
-                    No missed words yet
-                  </div>
-                )}
-              </div>
-            </div>
+            )}
           </div>
         </div>
 

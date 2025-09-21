@@ -21,6 +21,7 @@ interface BoardProps {
   canPlayAgain?: boolean; // controls showing Play Again button
   onPlayAgain?: () => void; // optional external handler for Play Again
   onGameOver?: () => void; // optional callback when timer hits 0
+  onGameOverStateChange?: (isOver: boolean) => void; // notify parent when game over toggles
   onMissedWordsAvailable?: (
     words: string[],
     highlight: (word: string) => void
@@ -35,6 +36,7 @@ function Board({
   canPlayAgain = true,
   onPlayAgain,
   onGameOver,
+  onGameOverStateChange,
   onMissedWordsAvailable,
 }: BoardProps) {
   const GRID_SIZE = gridSize;
@@ -85,6 +87,10 @@ function Board({
         const newTime = Math.max(0, t - 1);
         if (newTime === 0 && !gameOverSoundPlayed.current) {
           setIsGameOver(true);
+          // Inform parent that game is now over
+          try {
+            onGameOverStateChange && onGameOverStateChange(true);
+          } catch {}
           // Clear any in-progress trace when game ends
           setTrace([]);
           // Notify parent (e.g., host) so it can mark room Finished
@@ -176,6 +182,9 @@ function Board({
 
       // Reset game over state last
       setIsGameOver(false);
+      try {
+        onGameOverStateChange && onGameOverStateChange(false);
+      } catch {}
       gameOverSoundPlayed.current = false;
 
       // Ensure we have the trie

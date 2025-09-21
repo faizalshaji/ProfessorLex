@@ -17,6 +17,8 @@ interface GameProps {
   >;
   isHost?: boolean;
   onStartGame?: () => void;
+  onGameOver?: () => void;
+  isWaiting?: boolean; // explicitly indicate pre-start state for MP
 }
 
 export default function Game({
@@ -28,6 +30,8 @@ export default function Game({
   players,
   isHost,
   onStartGame,
+  onGameOver,
+  isWaiting,
 }: GameProps) {
   const [foundWords, setFoundWords] = useState<string[]>([]);
 
@@ -38,36 +42,7 @@ export default function Game({
     }
   };
 
-  if (!gameStarted) {
-    return (
-      <div className="relative flex h-full w-full items-center justify-center">
-        <img
-          src="/ProfessorLex/images/home.jpg"
-          alt="Game Background"
-          className="absolute inset-0 w-full h-full object-cover opacity-100 pointer-events-none"
-        />
-        <div className="relative z-10 bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] text-center">
-          <div className="text-4xl mb-4">🎲</div>
-          <h2 className="text-2xl font-semibold mb-3 text-white">
-            Game Not Started
-          </h2>
-          {mode === GameMode.MultiPlayer ? (
-            isHost ? (
-              <p className="text-[#2F6F5F] text-lg">
-                You’re the host. Start the game when ready.
-              </p>
-            ) : (
-              <p className="text-[#2F6F5F] text-lg">
-                Waiting for the room owner to start the game...
-              </p>
-            )
-          ) : (
-            <p className="text-[#2F6F5F] text-lg">Starting game...</p>
-          )}
-        </div>
-      </div>
-    );
-  }
+  // Always render the main layout; use overlay to indicate Waiting in MP
 
   return (
     <div className="relative flex flex-col h-full w-full">
@@ -127,7 +102,7 @@ export default function Game({
                       No players yet
                     </div>
                   )}
-                  {!gameStarted && isHost && (
+                  {isWaiting && isHost && (
                     <button
                       onClick={onStartGame}
                       className="w-full mt-4 py-2 px-4 bg-[#2F6F5F] hover:bg-[#3A8A75] text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#1A472F]/20 hover:shadow-[#2F6F5F]/40"
@@ -143,23 +118,43 @@ export default function Game({
           {/* Center Panel */}
           <div className="flex-1 overflow-hidden flex items-center justify-center relative">
             <div className="max-h-full p-6">
-              <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] hover:shadow-[0_0_50px_rgba(47,111,95,0.2)] transition-shadow duration-300 relative">
-                <Board
-                  onWordsChange={handleWordsChange}
-                  gridSize={gridSize}
-                  initialTime={time}
-                  gameStarted={gameStarted}
-                  canPlayAgain={mode === GameMode.SinglePlayer || !!isHost}
-                  onPlayAgain={
-                    mode === GameMode.MultiPlayer && isHost
-                      ? onStartGame
-                      : undefined
-                  }
-                />
-                {!gameStarted && (
-                  <div className="absolute inset-0 bg-black/30 cursor-not-allowed rounded-3xl"></div>
-                )}
-              </div>
+              {mode === GameMode.MultiPlayer && isWaiting ? (
+                <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-10 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] text-center">
+                  <div className="text-4xl mb-4">🎲</div>
+                  <h2 className="text-2xl font-semibold mb-3 text-white">
+                    Game Not Started
+                  </h2>
+                  {isHost ? (
+                    <p className="text-[#2F6F5F] text-lg">
+                      You’re the host. Start the game when ready.
+                    </p>
+                  ) : (
+                    <p className="text-[#2F6F5F] text-lg">
+                      Waiting for the room owner to start the game...
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] hover:shadow-[0_0_50px_rgba(47,111,95,0.2)] transition-shadow duration-300 relative">
+                  <Board
+                    onWordsChange={handleWordsChange}
+                    gridSize={gridSize}
+                    initialTime={time}
+                    gameStarted={gameStarted}
+                    canPlayAgain={mode === GameMode.SinglePlayer || !!isHost}
+                    onPlayAgain={
+                      mode === GameMode.MultiPlayer && isHost
+                        ? onStartGame
+                        : undefined
+                    }
+                    onGameOver={
+                      mode === GameMode.MultiPlayer && isHost
+                        ? onGameOver
+                        : undefined
+                    }
+                  />
+                </div>
+              )}
             </div>
           </div>
 

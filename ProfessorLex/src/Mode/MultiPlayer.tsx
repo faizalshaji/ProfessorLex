@@ -183,7 +183,8 @@ function Multiplayer() {
 
   // (moved playersForDisplay useMemo above to avoid hook-order issues with early returns)
 
-  const joinLocked = gameStarted && !activeId;
+  // Only lock joins while actively Playing; allow joins when Waiting or Finished
+  const joinLocked = room?.gameState === GameState.Playing && !activeId;
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
@@ -268,6 +269,16 @@ function Multiplayer() {
               isHost={activeHost}
               players={playersForDisplay || room.players}
               onStartGame={handleStartGame}
+              isWaiting={room.gameState === GameState.Waiting}
+              onGameOver={async () => {
+                // Mark the game as finished to unlock joins and show results
+                if (roomName) {
+                  try {
+                    const { endGame } = await import("../Utils/firebase");
+                    await endGame(roomName);
+                  } catch {}
+                }
+              }}
               onUpdateScore={(words) => {
                 const score = words.reduce((total, word) => {
                   const wordLength = word.length;

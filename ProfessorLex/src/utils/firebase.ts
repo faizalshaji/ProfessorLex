@@ -174,7 +174,8 @@ export const joinRoom = async (roomId: string, playerName: string) => {
   if (!room) {
     throw new Error("Room not found");
   }
-  if (room.gameState && room.gameState !== GameState.Waiting) {
+  // Allow join when room is Waiting or Finished; block only while Playing
+  if (room.gameState === GameState.Playing) {
     throw new Error("Game already started. Joining is disabled.");
   }
 

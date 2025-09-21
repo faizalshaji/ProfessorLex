@@ -20,6 +20,7 @@ interface BoardProps {
   gameStarted?: boolean;
   canPlayAgain?: boolean; // controls showing Play Again button
   onPlayAgain?: () => void; // optional external handler for Play Again
+  onGameOver?: () => void; // optional callback when timer hits 0
 }
 
 function Board({
@@ -29,6 +30,7 @@ function Board({
   gameStarted: isGameEnabled = false,
   canPlayAgain = true,
   onPlayAgain,
+  onGameOver,
 }: BoardProps) {
   const GRID_SIZE = gridSize;
   const [grid, setGrid] = useState<CellType[][]>([]);
@@ -79,6 +81,10 @@ function Board({
           setIsGameOver(true);
           // Clear any in-progress trace when game ends
           setTrace([]);
+          // Notify parent (e.g., host) so it can mark room Finished
+          try {
+            onGameOver && onGameOver();
+          } catch {}
           playGameOver();
           gameOverSoundPlayed.current = true;
         }
@@ -110,6 +116,15 @@ function Board({
       containerRef.current?.focus();
     }
   }, [isGameEnabled, isGameOver, time]);
+
+  // When a new round starts (gameStarted toggles true), reset the local board
+  useEffect(() => {
+    if (isGameEnabled) {
+      // Start of a new round
+      restartGame();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGameEnabled]);
 
   async function loadTrie(): Promise<any> {
     const words = await loadWords();
@@ -724,7 +739,12 @@ function Board({
           <GameOver score={score} />{" "}
           {canPlayAgain && (
             <button
-              onClick={onPlayAgain ? onPlayAgain : restartGame}
+              onClick={async () => {
+                // Always reset local board immediately
+                await restartGame();
+                // Then let parent trigger external start (e.g., Firebase)
+                if (onPlayAgain) onPlayAgain();
+              }}
               className="w-full py-3 mt-6 bg-[#2F6F5F] hover:bg-[#3A8A75] backdrop-blur-sm text-white font-semibold rounded-xl shadow-lg shadow-[#1A472F]/20 hover:shadow-[#2F6F5F]/40 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
             >
               Play Again

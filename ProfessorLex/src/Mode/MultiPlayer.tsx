@@ -33,14 +33,14 @@ function Multiplayer() {
     playerName: string;
     isHost: boolean;
   } | null>(null);
-  const [displayName, setDisplayName] = useState<string>("");
+  const [displayName, setDisplayName] = useState<string>(() => getUserName() || "");
   const lastSyncedRef = useRef<string | null>(null);
 
   // Compute a players map that immediately reflects local name for self
   const playersForDisplay = useMemo(() => {
     if (!room?.players) return room?.players;
     if (!session?.playerId) return room.players;
-    const localName = displayName || session.playerName || getUserName() || "";
+    const localName = displayName || session.playerName || "";
     const me = room.players[session.playerId];
     if (!me) return room.players;
     if (me.name === localName || !localName) return room.players;
@@ -60,12 +60,21 @@ function Multiplayer() {
     if (playerId && playerName) {
       const s = { playerId, playerName, isHost: !!isHost };
       setSession(s);
-      setDisplayName(playerName);
+      // Prefer the locally saved username if it exists
+      const local = getUserName();
+      setDisplayName(local || playerName);
     } else {
       const stored = getRoomSession(roomName);
       if (stored) {
-        setSession(stored);
-        setDisplayName(stored.playerName);
+        const local = getUserName();
+        const merged = local && local !== stored.playerName
+          ? { ...stored, playerName: local }
+          : stored;
+        setSession(merged);
+        setDisplayName(merged.playerName);
+        if (merged !== stored) {
+          setRoomSession(roomName, merged);
+        }
       } else {
         setSession(null);
       }
@@ -99,6 +108,19 @@ function Multiplayer() {
 
     return () => unsubscribe();
   }, [roomName, navigate, playerId, playerName, isHost]);
+
+  // If local username changes and differs from session, align them
+  useEffect(() => {
+    if (!roomName || !session) return;
+    const local = getUserName();
+    if (local && session.playerName !== local) {
+      const updated = { ...session, playerName: local };
+      setSession(updated);
+      setDisplayName(local);
+      setRoomSession(roomName, updated);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomName]);
 
   // After room data loads, ensure Firebase player name matches local session name
   useEffect(() => {
@@ -149,9 +171,7 @@ function Multiplayer() {
           onClick={() => setNeedsName(true)}
           title="Edit your name"
         >
-          <span>
-            {displayName || session?.playerName || getUserName() || ""}
-          </span>
+          <span>{displayName || session?.playerName || ""}</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
@@ -208,7 +228,7 @@ function Multiplayer() {
       {/* Name prompt for direct link join */}
       <NameModal
         isOpen={needsName}
-        initialName={displayName || session?.playerName || getUserName() || ""}
+        initialName={displayName || session?.playerName || ""}
         title="Your Name"
         confirmText={session ? "OK" : "Join"}
         onConfirm={async (name) => {

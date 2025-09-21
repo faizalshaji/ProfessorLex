@@ -21,7 +21,7 @@ import {
   clearRoomSession,
 } from "../Utils/storage";
 // joinRoom imported above
-import { HomeIcon } from "@heroicons/react/24/solid";
+import { HomeIcon, DocumentDuplicateIcon } from "@heroicons/react/24/solid";
 
 function Multiplayer() {
   const navigate = useNavigate();
@@ -32,6 +32,7 @@ function Multiplayer() {
   const [gameStarted, setGameStarted] = useState(false);
   const [needsName, setNeedsName] = useState(false);
   const [joinedDuringFinished, setJoinedDuringFinished] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [session, setSession] = useState<{
     playerId: string;
     playerName: string;
@@ -190,6 +191,45 @@ function Multiplayer() {
     navigate("/");
   };
 
+  const handleCopyRoomId = async () => {
+    const idToCopy = roomName || room.id;
+    if (!idToCopy) return;
+    const showCopied = () => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    };
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(idToCopy);
+        showCopied();
+        return;
+      }
+    } catch {}
+
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = idToCopy;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "absolute";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      const selection = document.getSelection();
+      const selected = selection
+        ? selection.rangeCount > 0
+          ? selection.getRangeAt(0)
+          : null
+        : null;
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      if (selected && selection) {
+        selection.removeAllRanges();
+        selection.addRange(selected);
+      }
+      showCopied();
+    } catch {}
+  };
+
   // (moved playersForDisplay useMemo above to avoid hook-order issues with early returns)
 
   // Only lock joins while actively Playing; allow joins when Waiting or Finished
@@ -209,7 +249,22 @@ function Multiplayer() {
           >
             <HomeIcon className="w-5 h-5" />
           </button>
-          <h2 className="text-xl font-bold">Room: {room.id}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold">Room: {room.id}</h2>
+            <button
+              onClick={handleCopyRoomId}
+              className="p-1 rounded bg-[#1F574A] hover:bg-[#286D5D] text-white"
+              title="Copy Room ID"
+              aria-label="Copy Room ID"
+            >
+              <DocumentDuplicateIcon className="w-5 h-5" />
+            </button>
+            {copied && (
+              <span className="ml-1 text-xs px-2 py-1 rounded bg-[#2F6F5F] text-white transition-opacity duration-300">
+                Copied!
+              </span>
+            )}
+          </div>
         </div>
         {/* Center: (intentionally empty; Start button moved to center waiting panel) */}
         <div className="flex items-center justify-center" />

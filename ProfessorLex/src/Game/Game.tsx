@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import Board from "./Board/Board";
 import FoundWords from "./FoundWords/FoundWords";
 import { GameMode } from "../Enums/GameMode";
+import WinnersPopup from "./WinnersPopup";
 
 interface GameProps {
   mode: GameMode;
@@ -40,6 +41,25 @@ export default function Game({
   const [missedWords, setMissedWords] = useState<string[]>([]);
   const highlightMissedRef = useRef<((w: string) => void) | null>(null);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [showWinners, setShowWinners] = useState(false);
+
+  // Prepare sorted players list when game over to feed the popup
+  const sortedPlayers = useMemo(() => {
+    if (!players) return [] as { id: string; name: string; score: number }[];
+    return Object.values(players)
+      .slice()
+      .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
+      .map((p) => ({ id: p.id, name: p.name, score: p.score }));
+  }, [players]);
+
+  // When game over in multiplayer, show winners popup for 8 seconds
+  useEffect(() => {
+    if (mode !== GameMode.MultiPlayer) return;
+    if (!isGameOver) return;
+    setShowWinners(true);
+    const t = setTimeout(() => setShowWinners(false), 8000);
+    return () => clearTimeout(t);
+  }, [isGameOver, mode]);
 
   const handleWordsChange = (words: string[]) => {
     setFoundWords(words);
@@ -254,6 +274,13 @@ export default function Game({
           </div>
         </footer>
       </div>
+      {mode === GameMode.MultiPlayer && showWinners && (
+        <WinnersPopup
+          players={sortedPlayers}
+          durationMs={8000}
+          onClose={() => setShowWinners(false)}
+        />
+      )}
     </div>
   );
 }

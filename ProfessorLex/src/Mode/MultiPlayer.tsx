@@ -181,7 +181,7 @@ function Multiplayer() {
       .map(() =>
         Array(gridSize)
           .fill(null)
-          .map(() => String.fromCharCode(65 + Math.floor(Math.random() * 26)))
+          .map(() => String.fromCharCode(97 + Math.floor(Math.random() * 26)))
       );
     await startGame(roomName, grid);
   };
@@ -416,6 +416,7 @@ function Multiplayer() {
               playerId={activeId}
               isHost={activeHost}
               players={playersForDisplay || room.players}
+              presetGrid={room.grid}
               onStartGame={handleStartGame}
               isWaiting={
                 room.gameState === GameState.Waiting || joinedDuringFinished

@@ -26,6 +26,8 @@ interface BoardProps {
     words: string[],
     highlight: (word: string) => void
   ) => void; // provide missed words and a highlighter back to parent
+  // If provided, use this fixed grid (letters only) instead of generating locally
+  presetGrid?: string[][];
 }
 
 function Board({
@@ -38,6 +40,7 @@ function Board({
   onGameOver,
   onGameOverStateChange,
   onMissedWordsAvailable,
+  presetGrid,
 }: BoardProps) {
   const GRID_SIZE = gridSize;
   const [grid, setGrid] = useState<CellType[][]>([]);
@@ -60,10 +63,10 @@ function Board({
     // Initial load only happens once
     if (initialLoadComplete.current) return;
 
-    // Initialize grid immediately with random letters
+    // Initialize grid immediately (use preset if provided)
     initGrid();
 
-    // Then load the trie and reinitialize grid with word validation
+    // Then load the trie and reinitialize grid with word validation (or preset)
     loadTrie().then((t) => {
       setTrie(t);
       // Only reinitialize if game hasn't started
@@ -129,6 +132,18 @@ function Board({
     }
   }, [isGameEnabled, isGameOver, time]);
 
+  // If the preset grid changes (new multiplayer round), update immediately
+  useEffect(() => {
+    if (presetGrid && presetGrid.length) {
+      const cells: CellType[][] = presetGrid.map((row, r) =>
+        row.map((ch, c) => ({ letter: ch, row: r, col: c }))
+      );
+      setGrid(cells);
+      finishLoading();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presetGrid]);
+
   // When a new round starts (gameStarted toggles true), reset the local board
   useEffect(() => {
     if (isGameEnabled) {
@@ -177,7 +192,7 @@ function Board({
           });
       } catch {}
 
-      // Initialize new grid
+      // Initialize new grid (prefer preset when provided)
       initGrid();
 
       // Reset game over state last
@@ -439,6 +454,16 @@ function Board({
 
   function initGrid() {
     setLoading(true); // Start loading
+
+    // If a preset grid is provided (e.g., multiplayer), use it directly
+    if (presetGrid && presetGrid.length) {
+      const cells: CellType[][] = presetGrid.map((row, r) =>
+        row.map((ch, c) => ({ letter: ch, row: r, col: c }))
+      );
+      setGrid(cells);
+      finishLoading();
+      return;
+    }
 
     if (!trie) {
       setGrid(generateGrid());

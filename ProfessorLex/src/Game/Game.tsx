@@ -19,6 +19,8 @@ interface GameProps {
   onStartGame?: () => void;
   onGameOver?: () => void;
   isWaiting?: boolean; // explicitly indicate pre-start state for MP
+  // Multiplayer: supply a shared preset grid (letters only) so all players see the same board
+  presetGrid?: string[][];
 }
 
 export default function Game({
@@ -32,6 +34,7 @@ export default function Game({
   onStartGame,
   onGameOver,
   isWaiting,
+  presetGrid,
 }: GameProps) {
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const [missedWords, setMissedWords] = useState<string[]>([]);
@@ -146,6 +149,7 @@ export default function Game({
                     gridSize={gridSize}
                     initialTime={time}
                     gameStarted={gameStarted}
+                    presetGrid={presetGrid}
                     canPlayAgain={mode === GameMode.SinglePlayer || !!isHost}
                     onPlayAgain={
                       mode === GameMode.MultiPlayer && isHost

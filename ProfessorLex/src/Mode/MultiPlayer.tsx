@@ -209,19 +209,8 @@ function Multiplayer() {
           </button>
           <h2 className="text-xl font-bold">Room: {room.id}</h2>
         </div>
-        {/* Center: Start button or status */}
-        <div className="flex items-center justify-center">
-          {activeHost && !gameStarted ? (
-            <button
-              onClick={handleStartGame}
-              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded transition-colors"
-            >
-              Start Game
-            </button>
-          ) : (
-            <div />
-          )}
-        </div>
+  {/* Center: (intentionally empty; Start button moved to center waiting panel) */}
+  <div className="flex items-center justify-center" />
         {/* Right: Player name + settings (only after join) */}
         <div className="flex justify-end">
           {activeId && (

@@ -102,14 +102,6 @@ export default function Game({
                       No players yet
                     </div>
                   )}
-                  {isWaiting && isHost && (
-                    <button
-                      onClick={onStartGame}
-                      className="w-full mt-4 py-2 px-4 bg-[#2F6F5F] hover:bg-[#3A8A75] text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#1A472F]/20 hover:shadow-[#2F6F5F]/40"
-                    >
-                      Start Game
-                    </button>
-                  )}
                 </div>
               </div>
             )}
@@ -125,9 +117,17 @@ export default function Game({
                     Game Not Started
                   </h2>
                   {isHost ? (
-                    <p className="text-[#2F6F5F] text-lg">
-                      You’re the host. Start the game when ready.
-                    </p>
+                    <div className="flex flex-col items-center gap-4">
+                      <p className="text-[#2F6F5F] text-lg">
+                        You’re the host. Start the game when ready.
+                      </p>
+                      <button
+                        onClick={onStartGame}
+                        className="mt-2 inline-flex items-center justify-center px-6 py-2 bg-[#2F6F5F] hover:bg-[#3A8A75] text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#1A472F]/20 hover:shadow-[#2F6F5F]/40"
+                      >
+                        Start Game
+                      </button>
+                    </div>
                   ) : (
                     <p className="text-[#2F6F5F] text-lg">
                       Waiting for the room owner to start the game...

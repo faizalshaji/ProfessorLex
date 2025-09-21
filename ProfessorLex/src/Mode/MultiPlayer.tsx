@@ -8,6 +8,7 @@ import {
   updatePlayerScore,
   updatePlayerName,
   joinRoom,
+  leaveRoom,
 } from "../Utils/firebase";
 import { GameMode } from "../Enums/GameMode";
 import { GameState } from "../Enums/GameState";
@@ -17,6 +18,7 @@ import {
   getUserName,
   setRoomSession,
   setUserName,
+  clearRoomSession,
 } from "../Utils/storage";
 // joinRoom imported above
 
@@ -159,13 +161,32 @@ function Multiplayer() {
     await startGame(roomName, grid);
   };
 
+  const handleLeave = async () => {
+    try {
+      if (roomName && activeId) {
+        await leaveRoom(roomName, activeId);
+      }
+    } catch {}
+    if (roomName) clearRoomSession(roomName);
+    navigate("/");
+  };
+
   // (moved playersForDisplay useMemo above to avoid hook-order issues with early returns)
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex justify-between items-center p-4  bg-[#0A2F2F]/90 backdrop-blur-md text-white">
-        <h2 className="text-xl font-bold">Room: {room.id}</h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleLeave}
+            className="px-3 py-1 rounded bg-[#1F574A] hover:bg-[#286D5D] text-white text-sm"
+            title="Go Home"
+          >
+            Home
+          </button>
+          <h2 className="text-xl font-bold">Room: {room.id}</h2>
+        </div>
         <button
           className="flex items-center gap-2 px-3 py-1 rounded bg-[#2F6F5F] hover:bg-[#3A8A75] text-white text-sm"
           onClick={() => setNeedsName(true)}

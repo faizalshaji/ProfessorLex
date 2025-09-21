@@ -202,10 +202,6 @@ function Multiplayer() {
             >
               Start Game
             </button>
-          ) : !activeHost && !gameStarted ? (
-            <div className="text-sm text-gray-400">
-              Waiting for host to start...
-            </div>
           ) : (
             <div />
           )}

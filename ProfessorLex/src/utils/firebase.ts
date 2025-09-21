@@ -44,6 +44,85 @@ export type Room = {
   gridSize?: number;
 };
 
+// Generate a GUID/UUID v4 for player IDs
+function uuidv4(): string {
+  // Use native if available
+  // @ts-ignore - crypto may not have randomUUID in some environments
+  if (typeof crypto !== "undefined" && (crypto as any).randomUUID) {
+    // @ts-ignore
+    return (crypto as any).randomUUID();
+  }
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    // Set version and variant per RFC 4122
+    bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+    bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant 10
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0"));
+    return (
+      hex.slice(0, 4).join("") +
+      "-" +
+      hex.slice(4, 6).join("") +
+      "-" +
+      hex.slice(6, 8).join("") +
+      "-" +
+      hex.slice(8, 10).join("") +
+      "-" +
+      hex.slice(10, 16).join("")
+    );
+  }
+  // Fallback
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+// Generate a readable room ID (10-15 chars) with pronounceable segments + digits
+function generateRoomId(): string {
+  const consonants = [
+    "b",
+    "c",
+    "d",
+    "f",
+    "g",
+    "h",
+    "j",
+    "k",
+    "l",
+    "m",
+    "n",
+    "p",
+    "r",
+    "s",
+    "t",
+    "v",
+    "w",
+    "y",
+    "z",
+  ];
+  const vowels = ["a", "e", "i", "o", "u"];
+  const rand = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+  const syllable = () =>
+    rand(consonants) +
+    rand(vowels) +
+    (Math.random() < 0.3 ? rand(consonants) : "");
+
+  // Build 3-4 syllables then add 2-4 digits to land between 10-15 total
+  const syllableCount = Math.random() < 0.5 ? 3 : 4;
+  let id = "";
+  for (let i = 0; i < syllableCount; i++) id += syllable();
+  const digitsCount = 2 + Math.floor(Math.random() * 3); // 2-4 digits
+  for (let i = 0; i < digitsCount; i++)
+    id += Math.floor(Math.random() * 10).toString();
+
+  // Ensure length bounds: trim or pad with random digits
+  if (id.length > 15) id = id.slice(0, 15);
+  while (id.length < 10) id += Math.floor(Math.random() * 10).toString();
+  return id;
+}
+
 export const createRoom = async (
   roomName: string,
   hostName: string,
@@ -51,8 +130,8 @@ export const createRoom = async (
 ) => {
   try {
     console.log("Creating room with name:", roomName);
-    const roomId = Math.random().toString(36).substring(2, 8);
-    const playerId = Math.random().toString(36).substring(2, 10);
+    const roomId = generateRoomId();
+    const playerId = uuidv4();
 
     const room: Room = {
       id: roomId,
@@ -96,7 +175,7 @@ export const joinRoom = async (roomId: string, playerName: string) => {
     throw new Error("Room not found");
   }
 
-  const playerId = Math.random().toString(36).substring(2, 10);
+  const playerId = uuidv4();
   const playerRef = ref(db, `rooms/${roomId}/players/${playerId}`);
 
   const newPlayer: RoomPlayer = {

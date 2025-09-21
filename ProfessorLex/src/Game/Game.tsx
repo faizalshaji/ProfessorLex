@@ -56,9 +56,10 @@ export default function Game({
   useEffect(() => {
     if (mode !== GameMode.MultiPlayer) return;
     if (!isGameOver) return;
+    // Show the Winners popup and let the component control its own duration
     setShowWinners(true);
-    const t = setTimeout(() => setShowWinners(false), 8000);
-    return () => clearTimeout(t);
+    // No auto-close timer here; WinnersPopup will call onClose after durationMs
+    return;
   }, [isGameOver, mode]);
 
   const handleWordsChange = (words: string[]) => {

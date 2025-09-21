@@ -84,26 +84,38 @@ export default function Game({
                 </div>
                 <div className="flex-1 overflow-y-auto p-4">
                   {players ? (
-                    Object.values(players).map((player) => (
-                      <div
-                        key={player.id}
-                        className={`p-3 rounded-lg border backdrop-blur-sm transition-all duration-200 ${
-                          player.isHost
-                            ? "bg-[#2F6F5F]/20 border-[#2F6F5F]/30 hover:bg-[#2F6F5F]/30"
-                            : "bg-[#0A2F2F]/40 border-[#2F6F5F]/20 hover:bg-[#0A2F2F]/60"
-                        }`}
-                      >
-                        <div className="flex justify-between items-center">
-                          <span className="flex items-center gap-2 text-white">
-                            {player.name}{" "}
-                            {player.isHost && (
-                              <span className="text-[#3A8A75]">👑</span>
-                            )}
-                          </span>
-                          <span className="text-[#3A8A75]">{player.score}</span>
+                    Object.values(players)
+                      .sort((a, b) => {
+                        const byScore = b.score - a.score;
+                        return byScore !== 0
+                          ? byScore
+                          : a.name.localeCompare(b.name);
+                      })
+                      .map((player, idx) => (
+                        <div
+                          key={player.id}
+                          className={`p-3 rounded-lg border backdrop-blur-sm transition-all duration-200 ${
+                            player.isHost
+                              ? "bg-[#2F6F5F]/20 border-[#2F6F5F]/30 hover:bg-[#2F6F5F]/30"
+                              : "bg-[#0A2F2F]/40 border-[#2F6F5F]/20 hover:bg-[#0A2F2F]/60"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="flex items-center gap-2 text-white">
+                              <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold rounded-full bg-[#1F574A] text-white">
+                                {idx + 1}
+                              </span>
+                              {player.name}
+                              {player.isHost && player.score > 0 && (
+                                <span className="text-[#3A8A75]">👑</span>
+                              )}
+                            </span>
+                            <span className="text-[#3A8A75]">
+                              {player.score}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      ))
                   ) : (
                     <div className="text-[#2F6F5F] text-center mt-4">
                       No players yet

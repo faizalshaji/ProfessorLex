@@ -21,6 +21,7 @@ import {
   clearRoomSession,
 } from "../Utils/storage";
 // joinRoom imported above
+import { HomeIcon } from "@heroicons/react/24/solid";
 
 function Multiplayer() {
   const navigate = useNavigate();
@@ -202,10 +203,11 @@ function Multiplayer() {
         <div className="flex items-center gap-2 justify-start">
           <button
             onClick={handleLeave}
-            className="px-3 py-1 rounded bg-[#1F574A] hover:bg-[#286D5D] text-white text-sm"
+            className="p-2 rounded bg-[#1F574A] hover:bg-[#286D5D] text-white"
             title="Go Home"
+            aria-label="Go Home"
           >
-            Home
+            <HomeIcon className="w-5 h-5" />
           </button>
           <h2 className="text-xl font-bold">Room: {room.id}</h2>
         </div>
@@ -247,9 +249,11 @@ function Multiplayer() {
               </p>
               <button
                 onClick={handleLeave}
-                className="px-4 py-2 rounded-lg bg-[#2F6F5F] hover:bg-[#3A8A75] text-white"
+                className="p-2 rounded-lg bg-[#2F6F5F] hover:bg-[#3A8A75] text-white"
+                title="Go Home"
+                aria-label="Go Home"
               >
-                Go Home
+                <HomeIcon className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -276,9 +280,11 @@ function Multiplayer() {
                 </button>
                 <button
                   onClick={handleLeave}
-                  className="px-4 py-2 rounded-lg bg-[#1F574A] hover:bg-[#286D5D] text-white"
+                  className="p-2 rounded-lg bg-[#1F574A] hover:bg-[#286D5D] text-white"
+                  title="Go Home"
+                  aria-label="Go Home"
                 >
-                  Go Home
+                  <HomeIcon className="w-5 h-5" />
                 </button>
               </div>
             </div>

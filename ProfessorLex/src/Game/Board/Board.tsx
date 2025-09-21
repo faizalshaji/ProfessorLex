@@ -197,7 +197,7 @@ function Board({
     }
   };
 
-  // Utility to get current word from trace
+  // Utility to get current word from traceFsingle
   const currentTraceWord = () =>
     trace
       .map((c) => c.letter)

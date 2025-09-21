@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { HomeIcon } from "@heroicons/react/24/solid";
 import Game from "../Game/Game";
 import { GameMode } from "../Enums/GameMode";
 
@@ -12,10 +13,11 @@ function SinglePlayer() {
       <div className="flex justify-between items-center p-4  bg-[#0A2F2F]/90 backdrop-blur-md text-white">
         <button
           onClick={() => navigate("/")}
-          className="px-3 py-1 rounded bg-[#1F574A] hover:bg-[#286D5D] text-white text-sm"
+          className="p-2 rounded bg-[#1F574A] hover:bg-[#286D5D] text-white"
           title="Go Home"
+          aria-label="Go Home"
         >
-          Home
+          <HomeIcon className="w-5 h-5" />
         </button>
         <div className="text-sm text-gray-300">Single Player</div>
       </div>

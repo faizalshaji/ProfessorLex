@@ -30,6 +30,7 @@ function Multiplayer() {
   const [room, setRoom] = useState<Room | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
   const [needsName, setNeedsName] = useState(false);
+  const [joinedDuringFinished, setJoinedDuringFinished] = useState(false);
   const [session, setSession] = useState<{
     playerId: string;
     playerName: string;
@@ -113,6 +114,13 @@ function Multiplayer() {
 
     return () => unsubscribe();
   }, [roomName, navigate, playerId, playerName, isHost]);
+
+  // When a new round starts, clear the temporary waiting flag for users who joined during Finished.
+  useEffect(() => {
+    if (room?.gameState === GameState.Playing && joinedDuringFinished) {
+      setJoinedDuringFinished(false);
+    }
+  }, [room?.gameState, joinedDuringFinished]);
 
   // If local username changes and differs from session, align them
   useEffect(() => {
@@ -256,6 +264,36 @@ function Multiplayer() {
               </button>
             </div>
           </div>
+        ) : !activeId ? (
+          // Not joined yet: show a waiting panel (both Waiting and Finished states)
+          <div className="flex-1 flex items-center justify-center">
+            <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 text-center text-white max-w-md mx-auto">
+              <h2 className="text-2xl font-semibold mb-3">
+                {room.gameState === GameState.Finished
+                  ? "Game Finished"
+                  : "Game Not Started"}
+              </h2>
+              <p className="text-[#2F6F5F] mb-6">
+                {room.gameState === GameState.Finished
+                  ? "Waiting for the host to start the next round."
+                  : "Waiting for the host to start the game."}
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => setNeedsName(true)}
+                  className="px-4 py-2 rounded-lg bg-[#2F6F5F] hover:bg-[#3A8A75] text-white"
+                >
+                  Join Room
+                </button>
+                <button
+                  onClick={handleLeave}
+                  className="px-4 py-2 rounded-lg bg-[#1F574A] hover:bg-[#286D5D] text-white"
+                >
+                  Go Home
+                </button>
+              </div>
+            </div>
+          </div>
         ) : (
           /* Game Board */
           <div className="flex-1">
@@ -269,7 +307,9 @@ function Multiplayer() {
               isHost={activeHost}
               players={playersForDisplay || room.players}
               onStartGame={handleStartGame}
-              isWaiting={room.gameState === GameState.Waiting}
+              isWaiting={
+                room.gameState === GameState.Waiting || joinedDuringFinished
+              }
               onGameOver={async () => {
                 // Mark the game as finished to unlock joins and show results
                 if (roomName) {
@@ -328,6 +368,10 @@ function Multiplayer() {
             setDisplayName(name);
             setUserName(name);
             setRoomSession(roomName, newSession);
+            // If room is currently Finished, keep user on Waiting view until next start
+            if (room?.gameState === GameState.Finished) {
+              setJoinedDuringFinished(true);
+            }
             setNeedsName(false);
           } catch {
             // keep modal open

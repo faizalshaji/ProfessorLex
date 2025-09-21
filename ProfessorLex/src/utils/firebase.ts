@@ -230,13 +230,13 @@ export const startGame = async (roomId: string, grid: any) => {
   const room = snapshot.val() as Room;
   if (!room) return;
 
-  // Ensure all players have foundWords array
+  // Ensure all players exist and reset scores and words for a fresh round
   const updatedPlayers = Object.entries(room.players).reduce(
     (acc, [playerId, player]) => {
       acc[playerId] = {
         ...player,
-        score: player.score || 0,
-        foundWords: player.foundWords || [],
+        score: 0,
+        foundWords: [],
       };
       return acc;
     },

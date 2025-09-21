@@ -91,15 +91,21 @@ function Multiplayer() {
       {/* Header */}
       <div className="flex justify-between items-center p-4  bg-[#0A2F2F]/90 backdrop-blur-md text-white">
         <h2 className="text-xl font-bold">Room: {room.id}</h2>
-        <div className="flex items-center gap-3">
-          <div className="text-sm text-gray-300">You: {activeName}</div>
-          <button
-            className="px-3 py-1 rounded bg-[#2F6F5F] hover:bg-[#3A8A75] text-white text-sm"
-            onClick={() => setNeedsName(true)}
+        <button
+          className="flex items-center gap-2 px-3 py-1 rounded bg-[#2F6F5F] hover:bg-[#3A8A75] text-white text-sm"
+          onClick={() => setNeedsName(true)}
+          title="Edit your name"
+        >
+          <span>{activeName}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="w-4 h-4"
           >
-            Change name
-          </button>
-        </div>
+            <path d="M11.49 3.17c-.38-1.15-2-.86-2 .36v.91a6.96 6.96 0 00-2.03.84l-.64-.64c-.9-.9-2.36.56-1.46 1.46l.64.64c-.35.63-.62 1.32-.79 2.04h-.91c-1.22 0-1.51 1.62-.36 2l.91.3c.06.71.25 1.4.54 2.03l-.64.64c-.9.9.56 2.36 1.46 1.46l.64-.64c.64.3 1.32.49 2.03.55l.3.91c.38 1.15 2 .86 2-.36v-.91c.71-.06 1.4-.25 2.03-.54l.64.64c.9.9 2.36-.56 1.46-1.46l-.64-.64c.3-.64.49-1.32.55-2.03l.91-.3c1.15-.38.86-2-.36-2h-.91a6.96 6.96 0 00-.84-2.03l.64-.64c.9-.9-.56-2.36-1.46-1.46l-.64.64a6.96 6.96 0 00-2.03-.84v-.91zM10 13a3 3 0 110-6 3 3 0 010 6z" />
+          </svg>
+        </button>
         {activeHost && !gameStarted && (
           <button
             onClick={handleStartGame}
@@ -147,12 +153,29 @@ function Multiplayer() {
       {/* Name prompt for direct link join */}
       <NameModal
         isOpen={needsName}
-        initialName={getUserName() ?? ""}
-        title="Enter your name to join"
-        confirmText="Join"
+        initialName={getUserName() ?? activeName ?? ""}
+        title="Your Name"
+        confirmText={effective ? "OK" : "Join"}
         onConfirm={async (name) => {
           if (!roomName) return;
           try {
+            // If already joined (effective exists), just update stored name and Firebase
+            if (effective) {
+              setUserName(name);
+              setRoomSession(roomName, {
+                playerId: effective.playerId,
+                playerName: name,
+                isHost: effective.isHost,
+              });
+              // Best-effort update to Firebase
+              // Avoid import cycle by lazy import
+              const { updatePlayerName } = await import("../Utils/firebase");
+              await updatePlayerName(roomName, effective.playerId, name);
+              setNeedsName(false);
+              return;
+            }
+
+            // Otherwise, join the room now
             const newId = await joinRoom(roomName, name);
             setUserName(name);
             setRoomSession(roomName, {

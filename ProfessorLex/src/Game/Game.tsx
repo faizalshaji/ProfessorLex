@@ -177,14 +177,12 @@ export default function Game({
               </span>
             </div>
             <div className="text-[#2F6F5F]">•</div>
-            <div className="flex items-center gap-2">
-              <span className="text-[#2F6F5F]">🎮</span>
-              <span className="text-white">
-                {mode === GameMode.SinglePlayer
-                  ? "Single Player"
-                  : "Multiplayer"}
-              </span>
-            </div>
+            {mode === GameMode.MultiPlayer && (
+              <div className="flex items-center gap-2">
+                <span className="text-[#2F6F5F]">🎮</span>
+                <span className="text-white">Multiplayer</span>
+              </div>
+            )}
           </div>
         </footer>
       </div>

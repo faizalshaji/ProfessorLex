@@ -14,24 +14,33 @@ export default function FoundWords({ words }: FoundWordsProps) {
     }
   }, [words]);
 
+  const hasWords = words.length > 0;
+
   return (
-    <div className="flex flex-col gap-2">
-      <ul
-        ref={listRef}
-        className="flex flex-col gap-2 pr-2 scrollbar-thin scrollbar-thumb-[#2F6F5F] scrollbar-track-transparent"
-      >
-        {words.map((w) => (
-          <li
-            key={w}
-            className="text-sm py-2 px-3 rounded-lg bg-[#2F6F5F]/20 text-[#3A8A75] font-medium border border-[#2F6F5F]/20 hover:bg-[#2F6F5F]/30 transition-colors duration-200"
-          >
-            {w.toUpperCase()}
-          </li>
-        ))}
-      </ul>
-      {words.length === 0 && (
+    <div
+      className={`flex flex-col gap-2 h-full ${
+        hasWords ? "" : "justify-center"
+      }`}
+    >
+      {hasWords ? (
+        <ul
+          ref={listRef}
+          className="flex flex-col gap-2 pr-2 scrollbar-thin scrollbar-thumb-[#2F6F5F] scrollbar-track-transparent"
+        >
+          {words.map((w) => (
+            <li
+              key={w}
+              className="text-sm py-2 px-3 rounded-lg bg-[#2F6F5F]/20 text-[#3A8A75] font-medium border border-[#2F6F5F]/20 hover:bg-[#2F6F5F]/30 transition-colors duration-200"
+            >
+              {w.toUpperCase()}
+            </li>
+          ))}
+        </ul>
+      ) : (
         <div className="text-center py-4 text-[#2F6F5F]/60">
-          No words found yet. Start finding words!
+          No words found yet.
+          <br />
+          Start finding words!
         </div>
       )}
     </div>

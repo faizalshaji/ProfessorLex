@@ -73,6 +73,8 @@ function Board({
         const newTime = Math.max(0, t - 1);
         if (newTime === 0 && !gameOverSoundPlayed.current) {
           setIsGameOver(true);
+          // Clear any in-progress trace when game ends
+          setTrace([]);
           playGameOver();
           gameOverSoundPlayed.current = true;
         }
@@ -86,6 +88,16 @@ function Board({
   useEffect(() => {
     drawArrows(trace);
   }, [trace]);
+
+  // Also clear arrows if game is over
+  useEffect(() => {
+    if (isGameOver) {
+      setTrace([]);
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (canvas && ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }, [isGameOver]);
 
   // Focus the container so it can capture keyboard input
   useEffect(() => {

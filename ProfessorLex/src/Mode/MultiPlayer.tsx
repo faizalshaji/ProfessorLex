@@ -147,7 +147,9 @@ function Multiplayer() {
 
   if (!room) return <div>Loading...</div>;
   const activeId = session?.playerId;
-  const activeHost = !!session?.isHost;
+  const activeHost = activeId
+    ? !!room.players?.[activeId]?.isHost
+    : !!session?.isHost;
   // Allow page to render while asking for a name
   if (!roomName || (!needsName && !activeId))
     return <div>Invalid game session</div>;

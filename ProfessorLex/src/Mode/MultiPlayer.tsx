@@ -354,7 +354,7 @@ function Multiplayer() {
       <div className="flex flex-1 overflow-hidden">
         {joinLocked ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 text-center text-white max-w-md mx-auto">
+            <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-2 border border-[#2F6F5F]/30 text-center text-white max-w-md mx-auto">
               <h2 className="text-2xl font-semibold mb-3">
                 Game Already Started
               </h2>
@@ -375,7 +375,7 @@ function Multiplayer() {
         ) : !activeId ? (
           // Not joined yet: show a waiting panel (both Waiting and Finished states)
           <div className="flex-1 flex items-center justify-center">
-            <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 text-center text-white max-w-md mx-auto">
+            <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-2 border border-[#2F6F5F]/30 text-center text-white max-w-md mx-auto">
               <h2 className="text-2xl font-semibold mb-3">
                 {room.gameState === GameState.Finished
                   ? "Game Finished"

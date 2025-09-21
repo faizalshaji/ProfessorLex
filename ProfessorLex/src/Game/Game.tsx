@@ -139,7 +139,7 @@ export default function Game({
           <div className="flex-1 overflow-hidden flex items-center justify-center relative">
             <div className="max-h-full p-6">
               {mode === GameMode.MultiPlayer && isWaiting ? (
-                <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-10 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] text-center">
+                <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-2 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] text-center">
                   <div className="text-4xl mb-4">🎲</div>
                   <h2 className="text-2xl font-semibold mb-3 text-white">
                     Game Not Started
@@ -163,7 +163,7 @@ export default function Game({
                   )}
                 </div>
               ) : (
-                <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] hover:shadow-[0_0_50px_rgba(47,111,95,0.2)] transition-shadow duration-300 relative">
+                <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-2 border border-[#2F6F5F]/30 shadow-[0_0_40px_rgba(47,111,95,0.1)] hover:shadow-[0_0_50px_rgba(47,111,95,0.2)] transition-shadow duration-300 relative">
                   <Board
                     onWordsChange={handleWordsChange}
                     gridSize={gridSize}

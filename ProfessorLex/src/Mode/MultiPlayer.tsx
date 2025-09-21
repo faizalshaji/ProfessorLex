@@ -21,7 +21,11 @@ import {
   clearRoomSession,
 } from "../Utils/storage";
 // joinRoom imported above
-import { HomeIcon, DocumentDuplicateIcon } from "@heroicons/react/24/solid";
+import {
+  HomeIcon,
+  DocumentDuplicateIcon,
+  LinkIcon,
+} from "@heroicons/react/24/solid";
 
 function Multiplayer() {
   const navigate = useNavigate();
@@ -33,6 +37,7 @@ function Multiplayer() {
   const [needsName, setNeedsName] = useState(false);
   const [joinedDuringFinished, setJoinedDuringFinished] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [session, setSession] = useState<{
     playerId: string;
     playerName: string;
@@ -230,6 +235,48 @@ function Multiplayer() {
     } catch {}
   };
 
+  const handleCopyLink = async () => {
+    // Build a hash-based URL that respects the current base path
+    const { origin, pathname } = window.location;
+    const basePath = pathname; // already excludes hash
+    const inviteUrl = `${origin}${basePath}#/multiplayer/${
+      room?.id ?? roomName ?? ""
+    }`;
+    const showCopied = () => {
+      setLinkCopied(true);
+      window.setTimeout(() => setLinkCopied(false), 1600);
+    };
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(inviteUrl);
+        showCopied();
+        return;
+      }
+    } catch {}
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = inviteUrl;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "absolute";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      const selection = document.getSelection();
+      const selected = selection
+        ? selection.rangeCount > 0
+          ? selection.getRangeAt(0)
+          : null
+        : null;
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      if (selected && selection) {
+        selection.removeAllRanges();
+        selection.addRange(selected);
+      }
+      showCopied();
+    } catch {}
+  };
+
   // (moved playersForDisplay useMemo above to avoid hook-order issues with early returns)
 
   // Only lock joins while actively Playing; allow joins when Waiting or Finished
@@ -259,9 +306,22 @@ function Multiplayer() {
             >
               <DocumentDuplicateIcon className="w-5 h-5" />
             </button>
+            <button
+              onClick={handleCopyLink}
+              className="p-1 rounded bg-[#1F574A] hover:bg-[#286D5D] text-white"
+              title="Copy Invite Link"
+              aria-label="Copy Invite Link"
+            >
+              <LinkIcon className="w-5 h-5" />
+            </button>
             {copied && (
               <span className="ml-1 text-xs px-2 py-1 rounded bg-[#2F6F5F] text-white transition-opacity duration-300">
-                Copied!
+                ID copied!
+              </span>
+            )}
+            {linkCopied && (
+              <span className="ml-1 text-xs px-2 py-1 rounded bg-[#2F6F5F] text-white transition-opacity duration-300">
+                Link copied!
               </span>
             )}
           </div>

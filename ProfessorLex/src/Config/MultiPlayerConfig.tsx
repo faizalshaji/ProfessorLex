@@ -171,7 +171,7 @@ export default function MultiplayerConfig(props: Props) {
               onChange={(e) => setRoomName(e.target.value)}
               className={getInputClass(!!joinError && !roomName)}
             />
-            {joinError && !roomName && (
+            {joinError && (
               <span className="text-red-500 text-sm">{joinError}</span>
             )}
           </div>

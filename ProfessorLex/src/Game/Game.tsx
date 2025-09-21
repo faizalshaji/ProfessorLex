@@ -53,7 +53,9 @@ export default function Game({
           </h2>
           {mode === GameMode.MultiPlayer ? (
             isHost ? (
-              <p className="text-[#2F6F5F] text-lg">You’re the host. Start the game when ready.</p>
+              <p className="text-[#2F6F5F] text-lg">
+                You’re the host. Start the game when ready.
+              </p>
             ) : (
               <p className="text-[#2F6F5F] text-lg">
                 Waiting for the room owner to start the game...
@@ -149,7 +151,9 @@ export default function Game({
                   gameStarted={gameStarted}
                   canPlayAgain={mode === GameMode.SinglePlayer || !!isHost}
                   onPlayAgain={
-                    mode === GameMode.MultiPlayer && isHost ? onStartGame : undefined
+                    mode === GameMode.MultiPlayer && isHost
+                      ? onStartGame
+                      : undefined
                   }
                 />
                 {!gameStarted && (

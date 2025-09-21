@@ -127,6 +127,13 @@ function Multiplayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomName]);
 
+  // If game already started and the user is not in the room, suppress name modal
+  useEffect(() => {
+    if (room?.gameState === GameState.Playing && !session?.playerId) {
+      setNeedsName(false);
+    }
+  }, [room?.gameState, session?.playerId]);
+
   // After room data loads, ensure Firebase player name matches local session name
   useEffect(() => {
     if (!roomName || !room || !session || !session.playerId) return;
@@ -150,9 +157,7 @@ function Multiplayer() {
   const activeHost = activeId
     ? !!room.players?.[activeId]?.isHost
     : !!session?.isHost;
-  // Allow page to render while asking for a name
-  if (!roomName || (!needsName && !activeId))
-    return <div>Invalid game session</div>;
+  // We always render the page; joinLocked and needsName control UI states.
 
   const handleStartGame = async () => {
     if (!roomName || !gridSize) return;
@@ -177,6 +182,8 @@ function Multiplayer() {
   };
 
   // (moved playersForDisplay useMemo above to avoid hook-order issues with early returns)
+
+  const joinLocked = gameStarted && !activeId;
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
@@ -228,42 +235,64 @@ function Multiplayer() {
 
       {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Game Board */}
-        <div className="flex-1">
-          <Game
-            mode={GameMode.MultiPlayer}
-            gridSize={gridSize ?? room.gridSize ?? 5}
-            time={time ?? room.gameDuration ?? 60}
-            gameStarted={gameStarted}
-            roomId={roomName}
-            playerId={activeId}
-            isHost={activeHost}
-            players={playersForDisplay || room.players}
-            onStartGame={handleStartGame}
-            onUpdateScore={(words) => {
-              const score = words.reduce((total, word) => {
-                const wordLength = word.length;
-                const baseScore = wordLength * 10;
-                const extraLetters = Math.max(0, wordLength - 3);
-                const bonus =
-                  extraLetters > 0 ? Math.pow(1.5, extraLetters - 1) * 20 : 0;
-                return total + Math.floor(baseScore + bonus);
-              }, 0);
-              if (activeId) updatePlayerScore(roomName, activeId, score, words);
-            }}
-          />
-        </div>
+        {joinLocked ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="bg-[#0A2F2F]/90 backdrop-blur-md rounded-3xl p-8 border border-[#2F6F5F]/30 text-center text-white max-w-md mx-auto">
+              <h2 className="text-2xl font-semibold mb-3">
+                Game Already Started
+              </h2>
+              <p className="text-[#2F6F5F] mb-6">
+                You can’t join this room right now because the game is in
+                progress.
+              </p>
+              <button
+                onClick={handleLeave}
+                className="px-4 py-2 rounded-lg bg-[#2F6F5F] hover:bg-[#3A8A75] text-white"
+              >
+                Go Home
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Game Board */
+          <div className="flex-1">
+            <Game
+              mode={GameMode.MultiPlayer}
+              gridSize={gridSize ?? room.gridSize ?? 5}
+              time={time ?? room.gameDuration ?? 60}
+              gameStarted={gameStarted}
+              roomId={roomName}
+              playerId={activeId}
+              isHost={activeHost}
+              players={playersForDisplay || room.players}
+              onStartGame={handleStartGame}
+              onUpdateScore={(words) => {
+                const score = words.reduce((total, word) => {
+                  const wordLength = word.length;
+                  const baseScore = wordLength * 10;
+                  const extraLetters = Math.max(0, wordLength - 3);
+                  const bonus =
+                    extraLetters > 0 ? Math.pow(1.5, extraLetters - 1) * 20 : 0;
+                  return total + Math.floor(baseScore + bonus);
+                }, 0);
+                if (activeId && roomName)
+                  updatePlayerScore(roomName, activeId, score, words);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Name prompt for direct link join */}
       <NameModal
-        isOpen={needsName}
+        isOpen={needsName && !joinLocked}
         initialName={displayName || session?.playerName || ""}
         title="Your Name"
         confirmText={session ? "OK" : "Join"}
         onConfirm={async (name) => {
           if (!roomName) return;
           try {
+            if (joinLocked) return;
             if (session) {
               // Update locally and remotely
               setDisplayName(name);

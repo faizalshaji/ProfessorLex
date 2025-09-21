@@ -174,6 +174,9 @@ export const joinRoom = async (roomId: string, playerName: string) => {
   if (!room) {
     throw new Error("Room not found");
   }
+  if (room.gameState && room.gameState !== GameState.Waiting) {
+    throw new Error("Game already started. Joining is disabled.");
+  }
 
   const playerId = uuidv4();
   const playerRef = ref(db, `rooms/${roomId}/players/${playerId}`);

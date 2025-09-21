@@ -25,7 +25,7 @@ export default function FoundWords({ words }: FoundWordsProps) {
       {hasWords ? (
         <ul
           ref={listRef}
-          className="flex flex-col gap-2 pr-2 scrollbar-thin scrollbar-thumb-[#2F6F5F] scrollbar-track-transparent"
+          className="flex flex-col gap-2 pr-2 pb-4 scrollbar-thin scrollbar-thumb-[#2F6F5F] scrollbar-track-transparent"
         >
           {words.map((w) => (
             <li
